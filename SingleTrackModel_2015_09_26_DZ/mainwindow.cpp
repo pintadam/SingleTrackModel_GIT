@@ -157,9 +157,6 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                             temporary[l] = (Values[Number][l]) + 2;
                         }
 
-                        /* rescale axes according to graph's data */
-                            //mainGraph->rescaleAxes();
-
                         /* create and configure plottables */
                         QCPGraph *mainGraph = Customplott[Number]->addGraph();
                         QCPGraph *SecondaryGraph = Customplott[Number]->addGraph();
