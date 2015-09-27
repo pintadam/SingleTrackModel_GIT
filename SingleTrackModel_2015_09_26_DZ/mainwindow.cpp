@@ -91,6 +91,15 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
     MeasurementCount = LoadDASMeasurement.count(); //Saving the number of the loaded measurement
     MeasurementCountOrigi = MeasurementCount;
 
+    QProgressDialog ProgressBar("Please wait...",NULL,0,MeasurementCount,this);
+    ProgressBar.setWindowModality(Qt::WindowModal);
+    ProgressBar.setFixedHeight(100);
+    ProgressBar.setFixedWidth(300);
+    ProgressBar.setWindowFlags(ProgressBar.windowFlags() & ~Qt::WindowCloseButtonHint);
+    ProgressBar.setWindowTitle("Loading Measurements");
+    ProgressBar.setValue(0);
+    ProgressBar.show();
+
     if (MeasurementCount != 0)
     {
         if (LoadDASMeasurement.empty())
@@ -144,13 +153,12 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                         Time[Number].clear();
                         Values[Number].clear();
 
+                        ProgressBar.setValue(Number);
+                        QApplication::processEvents();
                         openMDF(LoadDASMeasurement[Number]);
-
-                        int counter = 0;
 
                         Time[Number] = RawYR->getTime();
                         Values[Number] = RawYR->getData();
-
 
                         for (int l = 1; l < (Values[Number].count()); l++)
                         {
@@ -160,15 +168,18 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                         /* create and configure plottables */
                         QCPGraph *mainGraph = Customplott[Number]->addGraph();
                         QCPGraph *SecondaryGraph = Customplott[Number]->addGraph();
-                        SecondaryGraph->setData(Time[Number], temporary);
-                        SecondaryGraph->setPen(QPen(Qt::red));
+
                         mainGraph->setAdaptiveSampling(true);
                         mainGraph->setData(Time[Number], Values[Number]);
-                        Customplott[Number]->setObjectName("YawRate");
-                        Customplott[Number]->xAxis->setLabel("Time [s]");
-                        Customplott[Number]->yAxis->setLabel("Yaw Rate");
                         mainGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssNone, QPen(Qt::red), QBrush(Qt::white), 3));
                         mainGraph->setPen(QPen(QColor( 00,  150,  00), 1)); // Magic only happens, when line width == 1
+
+                        SecondaryGraph->setData(Time[Number], temporary);
+                        SecondaryGraph->setPen(QPen(Qt::red));
+
+                        Customplott[Number]->setObjectName("YawRate");
+                        Customplott[Number]->xAxis->setLabel("Time [s]");
+                        Customplott[Number]->yAxis->setLabel("Yaw Rate"); 
 
                         /* rescale axes according to graph's data */
                         mainGraph->rescaleAxes();
@@ -182,6 +193,10 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                     }
                 }
             }
+
+            /*ProgressBar.setValue(MeasurementCountOrigi);
+            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);*/
+
         }
 
         else if (MeasurementCount = 1)
@@ -196,26 +211,37 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                 }
             }
 
+            ProgressBar.setValue(Number);
+            QApplication::processEvents();
             openMDF(LoadDASMeasurement[0]);
 
-            for (int l = 1; l < (Values[Number].count()); l++)
-            {
-                temporary[l] = (Values[Number][l]) + 2;
-            }
+            Time[0] = RawYR->getTime();
+            Values[0] = RawYR->getData();
 
-            QVector<double> x = RawYR->getTime();
-            QVector<double> y = RawYR->getData();
+            for (int l = 1; l < (Values[0].count()); l++)
+            {
+                temporary[l] = (Values[0][l]) + 2;
+            }
 
             /* create and configure plottables */
             QCPGraph *mainGraph = Customplott[0]->addGraph();
+            QCPGraph *SecondaryGraph = Customplott[0]->addGraph();
+
             mainGraph->setAdaptiveSampling(true);
-            mainGraph->setData(x, y);
-            mainGraph->setName("YawRate");
+            mainGraph->setData(Time[0], Values[0]);
             mainGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssNone, QPen(Qt::red), QBrush(Qt::white), 3));
-            mainGraph->setPen(QPen(QColor( 120,  00,  00), 2)); // Magic only happens, when line width == 1
+            mainGraph->setPen(QPen(QColor( 00,  150,  00), 1)); // Magic only happens, when line width == 1
+
+            SecondaryGraph->setData(Time[0], temporary);
+            SecondaryGraph->setPen(QPen(Qt::red));
+
+            Customplott[0]->setObjectName("YawRate");
+            Customplott[0]->xAxis->setLabel("Time [s]");
+            Customplott[0]->yAxis->setLabel("Yaw Rate");
 
             /* rescale axes according to graph's data */
             mainGraph->rescaleAxes();
+            SecondaryGraph->rescaleAxes();
 
             ui->MeasurementsLayout->addWidget(Customplott[0],0,0);
         }
