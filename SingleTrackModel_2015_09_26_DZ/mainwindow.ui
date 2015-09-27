@@ -962,21 +962,21 @@
                    <item alignment="Qt::AlignRight">
                     <widget class="QLabel" name="Normal">
                      <property name="text">
-                      <string>Est1</string>
+                      <string>Normal</string>
                      </property>
                     </widget>
                    </item>
                    <item alignment="Qt::AlignRight">
                     <widget class="QLabel" name="Euler">
                      <property name="text">
-                      <string>Est2</string>
+                      <string>Euler</string>
                      </property>
                     </widget>
                    </item>
                    <item alignment="Qt::AlignRight">
                     <widget class="QLabel" name="Other">
                      <property name="text">
-                      <string>Est3</string>
+                      <string>Other</string>
                      </property>
                     </widget>
                    </item>

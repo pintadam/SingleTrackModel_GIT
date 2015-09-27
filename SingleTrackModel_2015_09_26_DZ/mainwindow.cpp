@@ -15,10 +15,12 @@ int MeasurementLines = 0;
 int Number = 0;
 int MeasurementCountOrigi = 0;
 int MeasurementCountOld = 0;
+int Remain = 0;
+int RemainOld = 0;
 
-QGroupBox *Data[MaximumMeasurements];
-QVBoxLayout *VerticalLayout[MaximumMeasurements];
-QLabel *Euler[MaximumMeasurements], *Normal[MaximumMeasurements], *Other[MaximumMeasurements];
+QGroupBox *Data[MaximumMeasurements], *SumData;
+QVBoxLayout *VerticalLayout[MaximumMeasurements], *SumVerticalLayout;
+QLabel *Euler[MaximumMeasurements], *Normal[MaximumMeasurements], *Other[MaximumMeasurements], *EulerSumLabel, *NormalSumLabel, *OtherSumLabel;
 QCustomPlot *Customplott[MaximumMeasurements];
 QVector<double> Time[MaximumMeasurements], Values[MaximumMeasurements], temporary(5000);
 
@@ -71,9 +73,8 @@ void MainWindow::on_actionSave_Identification_Project_triggered()
 
 void MainWindow::on_actionLoad_DAS_Measurement_triggered()
 {
-    MeasurementCountOld = MeasurementCount;
 
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < MaximumMeasurements; i++)
     {
         Data[i] = new QGroupBox;
         Euler[i] = new QLabel;
@@ -83,6 +84,12 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
         Customplott[i] = new QCustomPlot; // Handle the different measurements on separate customplots
     }
 
+    SumData = new QGroupBox;
+    EulerSumLabel = new QLabel;
+    NormalSumLabel = new QLabel;
+    OtherSumLabel = new QLabel;
+    SumVerticalLayout = new QVBoxLayout;
+
     QString path = "D:\\Measurement\\STM\\";
 
     /* Opening measurements in mdf format (in the future dl3 will be supported)*/
@@ -91,7 +98,7 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
     MeasurementCount = LoadDASMeasurement.count(); //Saving the number of the loaded measurement
     MeasurementCountOrigi = MeasurementCount;
 
-    QProgressDialog ProgressBar("Please wait...",NULL,0,MeasurementCount,this);
+    QProgressDialog ProgressBar("Please wait...",NULL,0,MeasurementCountOrigi,this);
     ProgressBar.setWindowModality(Qt::WindowModal);
     ProgressBar.setFixedHeight(100);
     ProgressBar.setFixedWidth(300);
@@ -99,6 +106,9 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
     ProgressBar.setWindowTitle("Loading Measurements");
     ProgressBar.setValue(0);
     ProgressBar.show();
+
+    Remain = MeasurementCount % 2; // Checking if it is an even number
+
 
     if (MeasurementCount != 0)
     {
@@ -115,13 +125,20 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                     deleteChildWidgets(ui->MeasurementsLayout);
                     deleteChildWidgets(ui->EstimationSubLayout);
                 }
+                qDebug() << "RemainOld: " << RemainOld;
+                if (RemainOld == 1)
+                {
+                    deleteChildWidgets(ui->EstimationSubLayout);
+                }
+                //ui->EstimationSubLayout->removeItem(SumData);
+                //deleteChildWidgets(SumData);
+                //delete SumData;
+
             }
             else
             {
 
             }
-
-            int Remain = MeasurementCount % 2; // Checking if it is an even number
 
             if (Remain == 1)
             {
@@ -140,13 +157,14 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
             {
                 for (int ColumnCount = 0; ColumnCount < MeasurementColumns; ColumnCount++)
                 {
-                    if ((Remain == 1) && (Number == MeasurementCount - 1))
+                    qDebug() << Number;
+                    if ((Remain == 1) && (Number == MeasurementCountOrigi))
                     {
+                        qDebug() << "Beléptünk az ágba";
                         // If uneven number of measurement is loaded, put a blankspot to the last place.
                         ui->MeasurementsLayout->addWidget(Customplott[Number],LineCount,ColumnCount);
                         Number++;
                     }
-
                     else
                     {
                         /* Clearing containers before reading new measurements */
@@ -199,16 +217,26 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
 
         }
 
-        else if (MeasurementCount = 1)
+        else if (MeasurementCount == 1)
         {
             if (!(ui->MeasurementsLayout->isEmpty()))
             {
                 for (int i = 0; i < MeasurementCountOld; i++)
                 {
                     /* Removing the existing widgets from the layouts, to avoid overlapping */
+                    qDebug() << "Layouts were deleted";
                     deleteChildWidgets(ui->MeasurementsLayout);
                     deleteChildWidgets(ui->EstimationSubLayout);
                 }
+                qDebug() << "RemainOld: " << RemainOld;
+                if (RemainOld == 1)
+                {
+                    deleteChildWidgets(ui->EstimationSubLayout);
+                }
+                //delete SumData;
+                //ui->EstimationSubLayout->removeItem(SumData);
+                //deleteChildWidgets(SumData);
+                //deleteChildWidgets(SumVerticalLayout->layout()->itemAt());
             }
 
             ProgressBar.setValue(Number);
@@ -278,32 +306,24 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
             VerticalLayout[k]->addWidget(Normal[k]);
             VerticalLayout[k]->addWidget(Euler[k]);
             VerticalLayout[k]->addWidget(Other[k]);
-
-            EulerSumValue += EulerValue[k];
-            NormalSumValue += NormalValue[k];
-            OtherSumValue += OtherValue[k];
         }
 
-        EulerSumValue /= MeasurementCountOrigi;
-        NormalSumValue /= MeasurementCountOrigi;
-        OtherSumValue /= MeasurementCountOrigi;
+        ui->EstimationSubLayout->addWidget(SumData);
+        EulerSumLabel->setNum(99);
+        NormalSumLabel->setNum(99);
+        OtherSumLabel->setNum(99);
 
-        ui->EstimationSubLayout->addWidget(Data[MeasurementCount]);
+        SumData->setLayout(SumVerticalLayout);
+        SumData->setTitle("Sum");
 
-        Euler[MeasurementCount]->setNum(EulerSumValue);
-        Normal[MeasurementCount]->setNum(NormalSumValue);
-        Other[MeasurementCount]->setNum(OtherSumValue);
-
-        Data[MeasurementCount]->setLayout(VerticalLayout[MeasurementCount]);
-        Data[MeasurementCount]->setTitle("Sum");
-
-        VerticalLayout[MeasurementCount]->addWidget(Normal[MeasurementCount]);
-        VerticalLayout[MeasurementCount]->addWidget(Euler[MeasurementCount]);
-        VerticalLayout[MeasurementCount]->addWidget(Other[MeasurementCount]);
+        SumVerticalLayout->addWidget(EulerSumLabel);
+        SumVerticalLayout->addWidget(NormalSumLabel);
+        SumVerticalLayout->addWidget(OtherSumLabel);
 
         ui->MeasurementsWidget->setLayout(ui->MeasurementsLayout); //Assign the widget to the GridLayout
         ui->EstimationDataGroupBox->setLayout(ui->EstimationSubLayout);
         MeasurementCountOld = MeasurementCount;
+        RemainOld = Remain;
     }
     else /* MeasrementCount == 0 */
     {
