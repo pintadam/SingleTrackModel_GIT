@@ -17,6 +17,8 @@ int MeasurementCountOrigi = 0;
 int MeasurementCountOld = 0;
 int Remain = 0;
 int RemainOld = 0;
+double Difference = 0.0;
+double AverageDifference[MaximumMeasurements];
 
 QGroupBox *Data[MaximumMeasurements], *SumData;
 QVBoxLayout *VerticalLayout[MaximumMeasurements], *SumVerticalLayout;
@@ -28,6 +30,8 @@ QVector<double> Time[MaximumMeasurements], MeasuredYawRateValues[MaximumMeasurem
 
 double EulerValue[MaximumMeasurements], NormalValue[MaximumMeasurements], OtherValue[MaximumMeasurements];
 double EulerSumValue, NormalSumValue, OtherSumValue, SumDelta;
+
+QString EulerSumString, NormalSumString, OtherSumString, EulerValueString[MaximumMeasurements], NormalValueString[MaximumMeasurements], OtherValueString[MaximumMeasurements];
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -76,6 +80,7 @@ void MainWindow::on_actionSave_Identification_Project_triggered()
 void MainWindow::on_actionLoad_DAS_Measurement_triggered()
 {
 
+
     for (int i = 0; i < MaximumMeasurements; i++)
     {
         Data[i] = new QGroupBox;
@@ -84,6 +89,9 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
         Other[i] = new QLabel;
         VerticalLayout[i] = new QVBoxLayout;
         Customplott[i] = new QCustomPlot; // Handle the different measurements on separate customplots
+        EulerValue[i] = 0;
+        NormalValue[i] = 0;
+        OtherValue[i] = 0;
     }
 
     SumData = new QGroupBox;
@@ -91,6 +99,10 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
     NormalSumLabel = new QLabel;
     OtherSumLabel = new QLabel;
     SumVerticalLayout = new QVBoxLayout;
+
+    EulerSumValue = 0;
+    NormalSumValue = 0;
+    OtherSumValue = 0;
 
     QString path = "D:\\Measurement\\STM\\";
 
@@ -178,10 +190,19 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                         MeasuredYawRateValues[Number] = FYAWRATE->getData();
                         EstimatedYawRateValues[Number] = YAWRREF->getData();
 
-                        for (int l = 1; l < (MeasuredYawRateValues[Number].count()); l++)
+                        for (int l = 1; l < (Time[Number].count()); l++)
                         {
-                            temporary[l] = (MeasuredYawRateValues[Number][l]) + 2;
+                            if(((MeasuredYawRateValues[Number][l]) - (EstimatedYawRateValues[Number][l])) > 0)
+                            {
+                                Difference += (MeasuredYawRateValues[Number][l]) - (EstimatedYawRateValues[Number][l]);
+                            }
+                            else
+                            {
+                                Difference += (EstimatedYawRateValues[Number][l]) - (MeasuredYawRateValues[Number][l]);
+                            }
                         }
+                        AverageDifference[Number] = Difference/(Time[Number].count());
+                        qDebug() << "Átlag különbség a " << Number << ". mérésben: " << AverageDifference[Number];
 
                         /* create and configure plottables */
                         QCPGraph *mainGraph = Customplott[Number]->addGraph();
@@ -240,10 +261,24 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
 
             EstimatedYawRateValues[0] = YAWRREF->getData();
 
-            for (int l = 1; l < (MeasuredYawRateValues[0].count()); l++)
+            for (int l = 1; l < (Time[0].count()); l++)
             {
                 temporary[l] = (MeasuredYawRateValues[0][l]) + 2;
             }
+
+            for (int l = 1; l < (Time[0].count()); l++)
+            {
+                if(((MeasuredYawRateValues[0][l]) - (EstimatedYawRateValues[0][l])) > 0)
+                {
+                    Difference += (MeasuredYawRateValues[0][l]) - (EstimatedYawRateValues[0][l]);
+                }
+                else
+                {
+                    Difference += (EstimatedYawRateValues[0][l]) - (MeasuredYawRateValues[0][l]);
+                }
+            }
+            AverageDifference[0] = Difference / (Time[0].count());
+            qDebug() << "Átlag különbség a " << 0 << ". mérésben: " << AverageDifference[0];
 
             /* create and configure plottables */
             QCPGraph *mainGraph = Customplott[0]->addGraph();
@@ -279,20 +314,26 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
 
             if (k == 0)
             {
-                EulerValue[k] = 0;
+                EulerValue[k] = AverageDifference[k];
                 NormalValue[k] = 0;
                 OtherValue[k] = 0;
+                EulerSumValue += EulerValue[k];
             }
             else
             {
-                EulerValue[k] = EulerValue[k - 1] + 0.1;
+                EulerValue[k] = AverageDifference[k];
+                //NormalValue[k] = NormalValue[k - 1] + 0.1;
                 NormalValue[k] = NormalValue[k - 1] + 0.1;
                 OtherValue[k] = OtherValue[k - 1] + 0.1;
+                EulerSumValue += EulerValue[k];
             }
 
-            Euler[k]->setNum(EulerValue[k]);
-            Normal[k]->setNum(NormalValue[k]);
-            Other[k]->setNum(OtherValue[k]);
+            EulerValueString[k].setNum(EulerValue[k],'g', 2);
+            NormalValueString[k].setNum(NormalValue[k],'g', 2);
+            OtherValueString[k].setNum(NormalValue[k],'g', 2);
+            Euler[k]->setText(EulerValueString[k]);
+            Normal[k]->setText(NormalValueString[k]);
+            Other[k]->setText(OtherValueString[k]);
 
             Data[k]->setLayout(VerticalLayout[k]);
             Data[k]->setTitle(QString::number(k+1));
@@ -303,15 +344,16 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
         }
 
         ui->EstimationSubLayout->addWidget(SumData);
-        EulerSumLabel->setNum(99);
+        EulerSumString.setNum(EulerSumValue,'g', 3);
+        EulerSumLabel->setText(EulerSumString);
         NormalSumLabel->setNum(99);
         OtherSumLabel->setNum(99);
 
         SumData->setLayout(SumVerticalLayout);
         SumData->setTitle("Sum");
 
-        SumVerticalLayout->addWidget(EulerSumLabel);
         SumVerticalLayout->addWidget(NormalSumLabel);
+        SumVerticalLayout->addWidget(EulerSumLabel);
         SumVerticalLayout->addWidget(OtherSumLabel);
 
         ui->MeasurementsWidget->setLayout(ui->MeasurementsLayout); //Assign the widget to the GridLayout
