@@ -1,32 +1,4 @@
-/**************************************************************************************************
-COPYRIGHT CONTINENTAL TEVES & AG & Co. oHG 1991-20xx
-CONFIDENTIAL AND PROPRIETARY. ALL RIGHTS RESERVED - PROPRIETARY OF CONTINENTAL TEVES AG & Co. oHG
-ABS/EBD/TCS/ESP-Controller Software
-***************************************************************************************************
-Filename:            AYC_STM_PARA.H
-Analyse-Chart:
-Name Functionmodell: AYC
-***************************************************************************************************
- $Log: ayc_stm_para.h  $
- Revision 1.8 2009/11/19 18:59:15CET Henke, Patrick (HenkeP)
- Add ASAP information to find center specific signals
- Revision 1.7 2009/05/28 10:25:46CEST Ravi, Bhuvanahalli Ramachandra (RaviR)
- Include path updated for Layer interface
- Revision 1.6 2009/03/09 13:04:32CET Beck, Rene (beck)
- correct ASAP names
- Revision 1.5 2007/07/04 15:53:31CEST Wickenhöfer, Thorsten (wickenhoefer)
- - Change interface GET_AYC_VEHICLE_PARAMETER() (34229:3TW040707).
- Revision 1.3 2006/10/06 15:25:45CEST beck
- QAC changes and bug fixing
- Revision 1.2 2006/08/22 11:30:02CEST beck
- Adapt codable bike model for main stream
- Revision 1.1 2006/02/02 16:27:55CET beck
- Initial revision
- Member added to project d:/mks/archives/src/AYC/2003CW23_AYC.pj
 
-
-***************************************************************************************************
-*/
 
 #ifndef ayc_stm_para_h_included
 #define ayc_stm_para_h_included
