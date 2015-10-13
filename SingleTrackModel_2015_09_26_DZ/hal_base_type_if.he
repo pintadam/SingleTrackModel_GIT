@@ -1,0 +1,827 @@
+/**
+@file
+$RCSfile: hal_base_type_if.he $
+$Revision: 1.19 $
+$Date: 2011/06/10 12:53:21CEST $
+
+Confidential and proprietary. This document and its contents are the
+exclusive property of Continental Teves AG & Co. OHG (Teves) and Conti Temic
+microelectronic GmbH (Temic) and their associated companies. They are not to
+be copied, distributed, or otherwise disclosed or used without the prior
+written consent of Teves and Temic. All rights reserved.
+
+@author RaviR
+
+@brief Base type definitions for all models
+
+@details base_types Global Base Type Definitions
+
+@defgroup HAL_IF  Hardware Abstraction Layer Interfaces
+@ingroup HAL
+
+@defgroup base_types Global Base Type Definitions
+@ingroup HAL_IF
+*/
+
+#ifndef hal_base_type_if_he_included
+#define hal_base_type_if_he_included
+
+/**
+ * @defgroup    ct_base_types CT generic base data types
+ * @ingroup     base_types
+ */
+
+
+
+
+/**
+ * @addtogroup  ct_base_types
+ * @{
+ */
+
+
+   /**
+    * @name CT generic 8 Bit data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief  8 bit data type
+ *
+ * @details
+ */
+typedef signed char             signed_char_t;
+
+/**
+ * @brief  8 bit data type
+ *
+ * @details
+ */
+typedef unsigned char           unsigned_char_t;
+
+/* satisfies Coding Standard SEV E-001-4.0 Page 8/47 */
+/* Autosar compatible */
+
+/**
+ * @brief Autosar and CT generic data type
+ *
+ * @details     char 8 bit (pchar -> plain char)
+ */
+typedef char                    pchar;
+
+
+/**
+ * @brief CT generic const 8bit data type
+ *
+ * @details
+ */
+typedef const unsigned_char_t   const_unsigned_char_t;
+
+
+   /**
+    * @}
+    */ /* name CT generic 8 Bit data types */
+
+
+   /**
+    * @name CT generic 16 Bit data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief 16 bit data type
+ *
+ * @details
+ */
+typedef signed short int        signed_int16_t;
+
+/**
+ * @brief 16 bit data type
+ *
+ * @details
+ */
+typedef unsigned short int      unsigned_int16_t;
+
+/**
+ * @brief CT generic const 16 bit data type
+ *
+ * @details
+ */
+typedef const unsigned_int16_t  const_unsigned_int16_t;
+
+
+   /**
+    * @}
+    */ /* name CT generic 16 Bit data types */
+
+
+   /**
+    * @name CT generic 32 Bit data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief 32 bit data type
+ *
+ * @details
+ */
+typedef signed int              signed_int32_t;
+
+/**
+ * @brief CT generic 32 bit data type
+ *
+ * @details
+ */
+typedef unsigned int            unsigned_int32_t;
+
+
+
+/**
+ * @brief
+ *
+ * @details for arthmetic with wsr pointer cast wsr as 32 bit integer
+ */
+typedef unsigned_int32_t        wsr_arithmetic_t;
+
+   /**
+    * @}
+    */ /* name CT generic 32 Bit data types */
+
+
+
+   /**
+    * @name CT generic pointer types
+    */
+   /** @{ */
+
+
+
+/**
+ * @brief void pointer type
+ *
+ * @details
+ */
+
+typedef void                    *void_ptr_t;
+
+/**
+ * @brief CT generic pointer type
+ *
+ * @details Pointer to unsigned char
+ */
+typedef unsigned_char_t         *unsigned_char_ptr_t;
+
+/**
+ * @brief CT generic pointer type to const data (8 bit)
+ *
+ * @details
+ */
+typedef const_unsigned_char_t   *const_unsigned_char_ptr_t;
+
+/**
+ * @brief CT generic pointer type to 16 bit data
+ *
+ * @details
+ */
+typedef unsigned_int16_t        *unsigned_int16_ptr_t;
+
+/**
+ * @brief CT generic pointer type to 16 bit const data
+ *
+ * @details
+ */
+typedef const_unsigned_int16_t  *const_unsigned_int16_ptr_t;
+
+
+   /**
+    * @}
+    */  /* name CT generic pointer types */
+
+
+
+   /**
+    * @name CT generic array types
+    */
+   /** @{ */
+
+
+/**
+ * @brief CT generic array type
+ *
+ * @details
+ */
+typedef unsigned_char_t         unsigned_char_array_t[];
+
+
+
+/**
+ * @brief CT generic 16 bit array type
+ *
+ * @details
+ */
+typedef unsigned_int16_t        unsigned_int16_array_t[];
+
+   /**
+    * @}
+    */  /* name CT generic array types */
+#if (SIM_SCT_STATIC_AS_EXTERN_CFG)
+/**
+@brief
+
+@details  all global static variables and functions in C modules
+          shall be defined by using "Global_static" instead of "static"
+          to support read (or also write) access to these variables in
+          a software simulation and component testing environment.
+*/
+
+#define Global_static extern
+
+#elif ((!SIM_TOTAL_CFG) && (!SIM_SCT_CFG))
+
+/**
+@brief
+
+@details  all global static variables and functions in C modules
+          shall be defined by using "Global_static" instead of "static"
+          to support read (or also write) access to these variables in
+          a software simulation and component testing environment.
+*/
+#define Global_static       static
+
+#else
+
+/**
+@brief
+
+@details  all global static variables and functions in C modules
+          shall be defined by using "Global_static" instead of "static"
+          to support read (or also write) access to these variables in
+          a software simulation and component testing environment.
+*/
+#define Global_static
+#endif
+
+
+/**
+ * @}
+ */ /* addtogroup  ct_base_types */
+
+
+#ifndef OSEK_MODEL
+
+/**
+ * @defgroup    autosar_types Autosar base data types
+ * @ingroup     base_types
+ */
+
+/**
+ * @addtogroup  autosar_types
+ * @{
+ */
+
+
+/* OSEK uses its own typedefs for uint{8,16,32} */
+
+   /**
+    * @name Autosar 8 Bit data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief
+ *
+ * @details     char 8 bit signed
+ */
+typedef signed char             sint8;
+
+/**
+ * @brief
+ *
+ * @details     char 8 bit unsigned
+ */
+typedef unsigned char           uint8;
+
+   /**
+    * @}
+    */  /* name Autosar 8 Bit data types */
+
+
+   /**
+    * @name Autosar 16 Bit data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief
+ *
+ * @details     integer 16 Bit signed
+ */
+typedef signed short            sint16;
+
+/**
+ * @brief
+ *
+ * @details     integer 16 Bit unsigned
+ */
+typedef unsigned short          uint16;
+
+   /**
+    * @}
+    */  /* name Autosar 16 Bit data types */
+
+
+   /**
+    * @name Autosar 32 Bit data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief
+ *
+ * @details     integer 32 Bit signed
+ */
+typedef signed long             sint32;
+
+/**
+ * @brief
+ *
+ * @details     integer 32 Bit unsigned
+ */
+typedef unsigned long           uint32;
+
+   /**
+    * @}
+    */  /* name Autosar 32 Bit data types */
+
+
+   /**
+    * @name Autosar boolean data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief
+ *
+ * @details     boolean
+ *
+ * @note        OSEK defines boolean with unsigned char
+ */
+typedef unsigned char           boolean;
+#endif
+
+
+   /**
+    * @}
+    */  /* name Autosar boolean data types */
+
+   /**
+    * @name Autosar real floating data types
+    */
+   /** @{ */
+
+
+/**
+ * @brief
+ *
+ * @details     float 32 Bit
+ */
+typedef float                   float32;
+
+/**
+ * @brief
+ *
+ * @details     float 64 Bit
+ */
+typedef double                  float64;
+
+
+/* typedef long double             float128; */ /* float 128 Bit */ /* 128 bit not supported by FSC MCORE, SPACE & TI compiler */
+
+   /**
+    * @}
+    */  /*  name Autosar real floating data types */
+
+
+/**
+ * @}
+ */ /* addtogroup  autosar_types */
+
+
+#if (defined(BFU_MODEL) && (SILICON_TI))
+    #ifndef osdSuppressPosixTypes
+    #define osdSuppressPosixTypes
+/**
+ * @defgroup    posix_types Posix conform base data types
+ *
+ * @details     workaround for TI compiler warning of conflicting types for uint{8,16,32}
+ *              which are typedef'd in osek.h. Disable them with osdSuppressPosixTypes
+ *              but then you have to define int{8,16,32}.
+ *              !!!!Don't use int{8,16,32} in BFU!!!!!
+ *
+ * @ingroup     base_types
+ */
+
+/**
+ * @addtogroup  posix_types
+ * @{
+ */
+
+
+
+/**
+ * @brief
+ *
+ * @details     integer 8 Bit signed
+ */
+typedef signed char int8;
+
+/**
+ * @brief
+ *
+ * @details     integer 16 Bit signed
+ */
+typedef signed short int16;
+
+/**
+ * @brief
+ *
+ * @details     integer 32 Bit signed
+ */
+typedef signed long int32;
+    #endif
+
+/**
+ * @}
+ */ /*  addtogroup posix_types */
+
+#endif
+
+/**
+ * @defgroup    system_types CT system specific types
+ *
+ * @ingroup     base_types
+ */
+
+#ifndef CFG_WHEEL_VELO_RANGE_32BIT
+#define CFG_WHEEL_VELO_RANGE_32BIT 0   /**< set if wheel speed types are of size 32 bit */
+#endif
+
+#ifndef CFG_UNLIMITED_VELOCITY_BFU
+#define CFG_UNLIMITED_VELOCITY_BFU 0   /**< set if UNLIMITED_WHEEL_VELOCITY_A interface is enabled */
+#endif
+
+/**
+ * @addtogroup  system_types
+ * @{
+ */
+
+#if (CFG_UNLIMITED_VELOCITY_BFU)
+/**
+ * @brief
+ *
+ * @details
+ */
+typedef signed_int32_t          wheel_velocity_s32bit_t;
+#endif
+
+#if (CFG_WHEEL_VELO_RANGE_32BIT)
+/**
+ * @brief type of all wheel velocity interfaces, i.e. UNCHANGED_WHEEL_VELOCITY_A
+ *
+ * @details
+ */
+typedef signed_int32_t          wheel_velocity_t;
+#else
+/**
+ * @brief type of all wheel velocity interfaces, i.e. UNCHANGED_WHEEL_VELOCITY_A
+ *
+ * @details
+ */
+typedef signed_int16_t          wheel_velocity_t;
+#endif
+
+/**
+ * @brief type of vehicle acceleration interfaces
+ *
+ * @details
+ */
+typedef signed_char_t           vehicle_acceleration_t;
+
+/**
+ * @brief type of wheel acceleration interfaces
+ *
+ * @details
+ */
+typedef signed_int16_t          wheel_acceleration_t;
+
+/**
+ * @brief
+ *
+ * @details
+ */
+/*typedef unsigned_char_t         tcs_tf_torque_t;*/
+
+/**
+ * @brief type of axle engine torque
+ *
+ * @details
+ */
+typedef signed_int16_t          tcs_axle_engine_torque_t;
+
+/**
+ * @brief
+ *
+ * @details
+ */
+/*typedef unsigned_int16_t        model_temperature_t;*/
+
+/**
+ * @brief type of model pressure
+ *
+ * @details
+ */
+typedef unsigned_int16_t        model_pressure_t;
+
+/**
+ * @brief type of filtered slip acceleration
+ *
+ * @details
+ */
+typedef signed_int16_t          filtered_slip_acceleration_t;
+
+/**
+ * @brief type of vehicle acceleration
+ *
+ * @details
+ */
+typedef signed_char_t           abs_vehicle_acceleration_t;
+
+/**
+ * @}
+ */ /* addtogroup  system_types  */
+
+
+/**
+ * @defgroup    inline_types Inline functionality
+ * @ingroup     base_types
+ *
+ */
+
+
+/**
+ * @addtogroup  inline_types
+ * @{
+ */
+
+
+
+   /**
+    * @name Microprocessor specific inline keywords
+    */
+   /** @{ */
+
+
+    #if (SILICON_TI)
+#define _inline_            inline   /**< @brief TI microprocessor */
+    #elif (SILICON_MOT)
+#define _inline_            __inline__  /* PRQA S 3431 */ /* Justification 3431: accepted, mapping needed for different compiler keywords */ /**< @brief inline keyword for FSL microprocessor */
+    #else
+#define _inline_            /**< @brief neither TI nor FSL microprocessor */
+    #endif
+
+
+   /**
+    * @}
+    */  /*  name Microprocessor specific inline keywords */
+
+
+
+#define Local               static                    /**< @brief */
+
+   /**
+    * @name CT inline macros
+    */
+   /** @{ */
+
+
+
+#define Local_inline        static _inline_           /**< @brief Declare/define inline function(s). inline function(s) used only locally */
+
+#define Global_inline       static _inline_           /**< @brief Declare/define inline function(s). inline functions(s) used globally */
+
+#define Inline_body         1
+
+   /**
+    * @}
+    */  /*  name CT inline macros */
+
+
+   /**
+    * @name CT runtime optimzation inline approach
+    */
+   /** @{ */
+
+
+
+    #if(1==CFG_RUNTIME_OPTIMIZATION)
+
+#define Global_inline_or_extern    static _inline_     /**< @brief "switch" to declare/define inline function or normal function. Here switch set to mode "inline mode" */
+
+#define Inline_or_extern_body      1                   /**< @brief "switch" to define function body or not. Here function body is visible */
+
+    #else
+
+#define Global_inline_or_extern    extern      /**< @brief "switch" to declare inline function or normal function. Here switch set to mode "normal function"inline function used only local */
+
+#define Inline_or_extern_body      0           /**< @brief "switch" to define function body or not. Here function body isn't visible */
+
+    #endif
+
+   /**
+    * @}
+    */  /*  name CT runtime optimzation inline approach */
+
+
+   /**
+    * @name CT inline approach considering modul test requirement(s)
+    * @details     The following macros are used to enable inlining functionality. Impact on Modul test functionality is considered by this macros.
+    *              Function inlining needs function definition (function body) at compile time. Therefore function definition is
+    *              put into include files (*.h* files). If such a design is chosen, non inlining by compiler leads probably to a linker failure.
+    *              Following approach is taken
+    * - Strap CFG_USE_INLINE_FUNCTION defines whether tagged functions are inlined or not. Strap will be set to 0 (no inline) if strap SIM_SCT_CFG is True. This is done to ensure, that modul test can access all functions.
+    * - Strap SIM_SCT_CFG defines whether sources are used in modul test environment or not.
+    * - Use macro  #Decl_inline_or_extern as function specifier (for inline function declaration in *.h* file)
+    * - Use macro  #Decl_inline_or_extern as function specifier (for inline function definition in *.h* file)
+    * - Strap Function definition with Macro #Body_inline logical ored with additional component specific macro xxx (this macro allows the usage of this component for modul test)
+    * - Define speficic macro xxx in one c-file of your component.
+    *
+    * example foo.h File
+    * @code
+
+      #include "..\hal\hal_base_type_if.he"
+
+      Decl_inline_or_extern unsigned_int32_t FOO(void);
+
+
+
+      #if ( ( Body_inline ) || ( defined Foo_inline ))
+
+      #ifdef PRQA_SIZE_T
+      #pragma PRQA_MESSAGES_OFF 3219
+      #pragma PRQA_MESSAGES_OFF 3480
+      #pragma PRQA_MESSAGES_OFF 3406
+      #endif
+
+      Decl_inline_or_extern unsigned_int32_t FOO(void)
+      {
+         return (1);
+      }
+
+      #ifdef PRQA_SIZE_T
+      #pragma PRQA_MESSAGES_ON 3219
+      #pragma PRQA_MESSAGES_ON 3480
+      #pragma PRQA_MESSAGES_ON 3406
+      #endif
+
+      #endif
+
+    * @endcode
+    * example foo.c File
+    * @code
+      #define  Foo_inline
+
+      #include "foo.h"
+    * @endcode
+    */
+   /** @{ */
+
+
+
+#if(CFG_USE_INLINE_FUNCTION)        /* Functions declared as inline are inlined */
+
+#define Decl_inline_or_extern      Global_inline  /**< @brief set function spezifier inline -> define inline function */
+#define Body_inline                (1)            /**< @brief function body will be visible in *.h* File. Function(s) is(are) defined in *.h* file  */
+
+#else /* Functions declared as inline are not inlined */
+
+#define Decl_inline_or_extern      extern         /**< @brief set function spezifier inline -> define inline function */
+#define Body_inline                (0)            /**< @brief function body will be not visible in *.h* File. Function(s) is(are) declared in *.h* file */
+
+#endif  /* CFG_USE_INLINE_FUNCTION */
+
+   /**
+    * @}
+    */  /*  name CT inline approach considering modul test requirement(s) */
+
+
+
+/**
+ * @}
+ */ /* addtogroup  inline_types */
+
+/**
+ * @defgroup    class_types CT class functionality and data types
+ *
+ * @ingroup     base_types
+ *
+ * @details
+ */
+
+/**
+ * @addtogroup  class_types
+ * @{
+ */
+
+/**
+ * @brief Type qualifier of class object
+ *
+ */
+#define Store_class         const
+
+/**
+ * @brief Type qualifier of static/constant configuration object(s), which is member of class object
+ *
+ * @details
+ */
+#define Store_config        const
+
+/**
+ * @brief Type qualifier of non constant object(s) (variables) of class
+ *
+ * @details
+ */
+#define Store_memory
+
+
+/**
+ * @brief Class Object
+ *
+ * @details
+ */
+typedef Store_class struct class_s class_t;
+
+
+/**
+ * @brief Complex class data type
+ *
+ * @details Class with Subobjects (Configuration Object, Object containing Functions, Object containing non constant data
+ */
+struct class_s
+{
+   Store_config void * Store_class config_data;    /*!< @ASAP_NAME   pSTR_CLASS_CONFIG_DATA @UNIT   @LSB   @MIN   @MAX   @OFFSET   @brief Pointer to static/constant configuration object  */
+   Store_config void * Store_class function_data;  /*!< @ASAP_NAME   pSTR_CLASS_FUNC_DATA @UNIT     @LSB   @MIN   @MAX   @OFFSET   @brief Pointer to function(s)  */
+   Store_memory void * Store_class static_data;    /*!< @ASAP_NAME   pSTR_CLASS_STATIC_DATA @UNIT   @LSB   @MIN   @MAX   @OFFSET   @brief Pointer to object containing non constant data (variables)  */
+};
+
+/**
+ * @}
+ */ /* addtogroup  class_types */
+
+/**
+ * @defgroup    util_macro Utility Macros
+ * @ingroup     base_types
+ * @details
+ */
+
+/**
+ * @addtogroup  util_macro
+ * @{
+ */
+
+
+/**
+ * @brief   Macro to prevent compiler warnings
+ *
+ * @details  Macro to work around the compilers warning about unused parameters, fixes QAC warning as well.
+ *
+ * @param[in] var  name of local variable
+ */
+
+
+#define ReferenceUnusedParameter(var) (var) = (var)
+
+
+
+/**
+ * @brief    Macro to calculate the size of an object
+ *
+ * @return   nr of members of array object
+ *
+ * @param[in] object_ptr pointer to array of simple/complex data type
+ */
+#define object_size(object_ptr)   (sizeof(object_ptr)/sizeof((object_ptr)[0]))
+
+/**
+ * @}
+ */ /* addtogroup  util_macro */
+
+
+#endif /* hal_base_type_if_he_included */
+

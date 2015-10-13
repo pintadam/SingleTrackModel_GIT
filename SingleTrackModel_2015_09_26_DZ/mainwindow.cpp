@@ -130,10 +130,6 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                 {
                     deleteChildWidgets(ui->EstimationSubLayout);
                 }
-                //ui->EstimationSubLayout->removeItem(SumData);
-                //deleteChildWidgets(SumData);
-                //delete SumData;
-
             }
             else
             {
@@ -211,10 +207,6 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                     }
                 }
             }
-
-            /*ProgressBar.setValue(MeasurementCountOrigi);
-            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);*/
-
         }
 
         else if (MeasurementCount == 1)
@@ -233,10 +225,6 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                 {
                     deleteChildWidgets(ui->EstimationSubLayout);
                 }
-                //delete SumData;
-                //ui->EstimationSubLayout->removeItem(SumData);
-                //deleteChildWidgets(SumData);
-                //deleteChildWidgets(SumVerticalLayout->layout()->itemAt());
             }
 
             ProgressBar.setValue(Number);

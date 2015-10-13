@@ -1,0 +1,949 @@
+/***************************************************************************************************
+COPYRIGHT* CONTINENTAL TEVES & AG & Co. oHG 1991-20xx
+CONFIDENTIAL AND PROPRIETARY. ALL RIGHTS RESERVED - PROPRIETARY OF CONTINENTAL TEVES AG & Co. oHG
+ABS/EBD/TCS/ESP-Controller Software
+****************************************************************************************************
+$Log: math_lib.he  $
+Revision 1.27 2009/11/24 05:26:26CET Raghavendra
+Added contents of  math_lib.h  - SAFE 729347
+Revision 1.26 2009/10/15 13:50:06CEST Popovici, Leonida (ciora)
+remove pragma
+Revision 1.25 2009/07/23 09:06:58CEST Popovici, Leonida (ciora)
+Remove QAC warning based on FR 514558
+Revision 1.24 2009/07/22 14:54:44CEST Popovici, Leonida (ciora)
+QAC warning resolved (adding "U" suffix to a const integer value)
+Revision 1.23 2008/11/17 12:48:29CET Popovici, Leonida (ciora)
+Added two new macros and a new function (based on FR 247402)
+Revision 1.22 2008/11/14 14:28:00CET Ciora, Leonida (ciora)
+Merge modifications from revision 1.21.1.1
+Revision 1.21 2008/08/21 09:50:09CEST Soaca, Silviu (SoacaS)
+Removed "no side efects" from cos_aprox and sin_aprox
+Revision 1.20 2008/08/04 13:50:40EEST Schlecht, Volker (schlecht)
+Move enclosing #endif to bottom of file.
+[Otherwise double inclusion will lead to multiple definition od SINE/COSINE approximation functions.]
+Revision 1.19 2008/08/04 12:32:19EEST Soaca, Silviu (soacas)
+QAC corrections
+Revision 1.18 2008/06/10 15:44:03EEST Ricu, Ovidiu (ricu)
+fix QAC warning 5013
+Revision 1.17 2007/06/01 13:26:06EEST Schlecht, Volker (schlecht)
+Merge AYC sine/cosine approximations to trunk
+Revision 1.16 2006/08/18 07:15:05CEST tompa
+New function CALCULATE_GRADIENT for calculating the gradient with a target resolution
+Revision 1.15 2006/07/03 17:54:49EEST jaeger
+For function inlining use new macros defined in sfl_inline.he.
+QA-C warnings for undefinitions and for unused functions are removed by this way.
+Revision 1.14 2006/06/22 17:12:53CEST jaeger
+New macros UNSIGN_INT32, UNSIGN_INT16, UNSIGN_CHAR
+for casting to unsigned value, mapping negative values to 0.
+New macros SINT_DIV, UINT_DIV
+for integer division of signed resp. unsigned values.
+Revision 1.13 2005/10/18 14:25:59CEST jaeger
+MUL_DIV_SHORT: correct limitation
+(use INTLIM instead of cast)
+Revision 1.12 2005/10/07 10:04:47CEST jaeger
+Remove QA-C warning (INT_DIV)
+Revision 1.11 2005/09/30 16:51:49CEST jaeger
+New function POLYGON_SECTION and macros Get_polygon_...
+to access sections of polygons from parameter DB
+Revision 1.10 2005/09/28 13:15:17CEST jaeger
+Correction of INT_DIV:
+In case of negative result, rounding did not work correctly.
+Revision 1.9 2005/09/13 16:48:58CEST jaeger
+Added casts to avoid implicit conversions
+Revision 1.8 2005/06/16 16:36:25CEST jaeger
+Added parantheses to fulfil coding standard
+Revision 1.7 2005/04/20 18:21:07CEST jaeger
+- Added new functions SQRT32, LOG_D_65536, EXP_D_65536.
+- Added missing comments and cleaned-up existing comments.
+Revision 1.6 2005/03/17 15:37:38CET jaeger
+- removed macro BOUND_VAL (use Limit instead)
+- added new macro Absolute
+- clean-up for QA-C
+Revision 1.5 2005/03/15 14:57:12CET jaeger
+Added content of BFU\mathfunc.he
+Revision 1.4 2005/02/08 09:45:50CET jaeger
+Added missing header "base_typ.he"
+Revision 1.3 2004/10/15 09:51:00CEST jaeger
+New macro Limit
+Revision 1.2 2004/08/10 15:35:42CEST jaeger
+Correct function names
+
+****************************************************************************************************/
+
+#include "hal_base_type_if.he"
+
+#ifndef __math_lib_he__
+#define __math_lib_he__
+
+#define Char_bit                 8    /* NUMBER OF BITS IN TYPE CHAR  */
+#define Schar_max              127    /* MAX VALUE FOR SIGNED CHAR    */
+#define Schar_min      (-Schar_max-1) /* MIN VALUE FOR SIGNED CHAR    */
+#define Uchar_max              255    /* MAX VALUE FOR UNSIGNED CHAR  */
+#define Uchar_min                0    /* MIN VALUE FOR UNSIGNED CHAR  */
+
+#define Shrt_max             32767    /* MAX VALUE FOR SHORT          */
+#define Shrt_min        (-Shrt_max-1) /* MIN VALUE FOR SHORT          */
+#define Ushrt_max            65535u   /* MAX VALUE FOR UNSIGNED SHORT */
+
+#define Int_max              32767    /* MAX VALUE FOR INT            */
+#define Int_min         (-Int_max-1)  /* MIN VALUE FOR INT            */
+#define Uint_max             65535u   /* MAX VALUE FOR UNSIGNED INT   */
+
+#define Long_max        2147483647    /* MAX VALUE FOR LONG           */
+#define Long_min        (-Long_max-1) /* MIN VALUE FOR LONG           */
+#define Ulong_max       4294967295u   /* MAX VALUE FOR UNSIGNED LONG  */
+
+#  define __SFL_INLINE__        Global_inline
+
+/* PRQA S 3406 EOF */ /* the declaration is intended */
+
+/*************************************
+***  typedefs ************************
+*************************************/
+typedef struct
+{
+  unsigned int  ZERO_Q         : 1;
+  unsigned int  INVALID_Q      : 1;
+} gradient_qualifiers_t;
+
+typedef struct
+{
+signed_int32_t       GRAD_PER_LOOP;
+gradient_qualifiers_t    QUALIFIER;
+} gradient_return_t;
+
+/*===================================================================
+                            MACROS
+===================================================================*/
+/* -------------------------------------------------------------------------
+* Latest update:
+*.#b001LS040200. Macro 'Limit' added
+*.#b001GUT201101. Macro 'Upper_limit' added
+*
+---------------------------------------------------------------------------*/
+
+/**
+@details
+@return
+@param v
+@param max
+*/
+#define Upper_limit(v,max)                   \
+do                                           \
+{                                            \
+   if ((v)>(max))                            \
+   {                                         \
+      (v) = (max);                           \
+   }                                         \
+}while(0)
+
+/**
+@details
+@return
+@param v
+@param min
+*/
+#define Lower_limit(v,min)                   \
+do                                           \
+{                                            \
+   if ((v)<(min))                            \
+   {                                         \
+      (v) = (min);                           \
+   }                                         \
+}while(0)
+
+
+
+/*************************************
+**** Basic mathematical functions ****
+*************************************/
+
+/******************************************************************************
+Extern Name: DABS_F
+Description: Calculates absolute value (short integer)
+******************************************************************************/
+__SFL_INLINE__ signed_int16_t DABS_F (signed_int16_t in_value);
+
+
+
+/******************************************************************************
+Extern Name: LABS_F
+Description: Calculates absolute value (long integer)
+******************************************************************************/
+__SFL_INLINE__ signed_int32_t LABS_F (signed_int32_t in_value_l)
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS LABS_F
+#endif  /* PRQA_SIZE_T */
+#if(__SFL_INLINE_BODY__)
+{
+  signed_int32_t output_l;
+
+  if (in_value_l >= 0)
+  {
+    output_l = in_value_l;
+  }
+  else if (in_value_l <= -Long_max)
+  {
+    output_l = Long_max;
+  }
+  else
+  {
+    output_l = -in_value_l;
+  }
+  return(output_l);
+} /* LABS_F */
+#else
+;
+#endif
+
+
+/******************************************************************************
+Extern Name: DSIGN_F
+Description: Calculates signum function (integer)
+             input  output
+              >= 0     1
+              <  0    -1
+******************************************************************************/
+__SFL_INLINE__ signed_int16_t DSIGN_F (signed_int16_t in_value);
+
+
+
+/******************************************************************************
+Extern Name: LSIGN_F
+Description: Calculates signum function (long integer)
+             input  output
+              >= 0     1
+              <  0    -1
+******************************************************************************/
+__SFL_INLINE__ signed_int32_t LSIGN_F (signed_int32_t in_value);
+
+
+
+/******************************************************************************
+Extern Name: INTLIM
+Description: Limit long input value to signed integer range -32768...32767
+******************************************************************************/
+__SFL_INLINE__ signed_int16_t INTLIM (signed_int32_t input);
+
+
+/******************************************************************************
+Extern Name: FLDIVS16
+Description:
+******************************************************************************/
+__SFL_INLINE__ signed_int16_t
+FLDIVS16 (signed_int32_t dividend_s32, signed_int16_t divisor_s16)
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS FLDIVS16
+#endif  /* PRQA_SIZE_T */
+#if(__SFL_INLINE_BODY__)
+{
+  return((signed_int16_t)(dividend_s32/divisor_s16));
+}
+#else
+;
+#endif
+
+
+/******************************************************************************
+Extern Name: FLDIVU16
+Description:
+******************************************************************************/
+__SFL_INLINE__ unsigned_int16_t
+FLDIVU16 (unsigned_int32_t dividend_u32, unsigned_int16_t divisor_u16)
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS FLDIVU16
+#endif  /* PRQA_SIZE_T */
+#if(__SFL_INLINE_BODY__)
+{
+  return((unsigned_int16_t)(dividend_u32/(unsigned_int32_t)divisor_u16));
+}
+#else
+;
+#endif
+
+
+/******************************************************************************
+Macro Name:  DABS
+Description: absolute value, limited to range of signed_int16_t
+******************************************************************************/
+#define DABS(value1)\
+    (((value1) >= 0) ? (value1) :( ((value1)<=(-Int_max)) ? (Int_max): (-(value1))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS DABS
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  LABS
+Description: absolute value, limited to range of signed_int32_t
+******************************************************************************/
+#define LABS(value1)\
+    (((value1) >= 0) ? (value1) : ( ((value1)<=(-Long_max)) ? (Long_max) : (-(value1))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS LABS
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  Absolute
+Description: absolute value
+******************************************************************************/
+#define Absolute(x)\
+    (((x)<0) ? (-(x)):(x))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Absolute
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  DSIGN
+Description: sign, 1 if positive or zero, 0 if negativ
+******************************************************************************/
+#define DSIGN(value1)\
+    (((value1) >= 0) ? (1) : (-1))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS DSIGN
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  MAX
+Description: Maximum of two arguments
+******************************************************************************/
+#define MAX(value2, value1)\
+    (((value1)>=(value2)) ? (value1) : (value2))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS MAX
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  MIN
+Description: Minimum of two arguments
+******************************************************************************/
+#define MIN(value1, value2)\
+    (((value1) >= (value2)) ? (value2) : (value1))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS MIN
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Macro Name:  Packed
+Description:
+******************************************************************************/
+#define Packed(val_1, val_2, val_3, val_4)\
+    (\
+       ( ( (unsigned_int16_t) Logd((val_1)) ) << 12 )\
+     | ( (                    Logd((val_2)) ) << 8  )\
+     | ( (                    Logd((val_3)) ) << 4  )\
+     | ( (                    Logd((val_4)) )       )\
+    )
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Packed
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  MUL_DIV_SHORT
+Description: calculate (value1*value2)/value3
+******************************************************************************/
+#define MUL_DIV_SHORT(value1, value2, value3)\
+    (INTLIM( ( (signed_int32_t)(value1) * (signed_int32_t)(value2) ) / (signed_int32_t)(value3) ))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS MUL_DIV_SHORT
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  INT_DIV, SINT_DIV, UINT_DIV
+Description: integer division, rounded
+             e.g: 8/3 = 2  => INT_DIV(8,3)=2.66667=3
+             SINT_DIV: for signed integers
+             UINT_DIV: for unsigned integers (faster than SINT_DIV or INT_DIV)
+             INT_DIV:  for signed and unsigned integers (but only in range of signed_int32!)
+******************************************************************************/
+#define SINT_DIV(A,B)    (((B)==0) ? 0 : (( (A) + ((DSIGN(A)*DSIGN(B))*((B)/2))) /(B)) )
+
+#ifdef PRQA_SIZE_T
+#pragma PRQA_MACRO_MESSAGES_OFF "SINT_DIV",3355,3356
+#endif
+
+#define INT_DIV(A,B)     (SINT_DIV((signed_int32_t)(A), (signed_int32_t)(B)))
+#define UINT_DIV(A,B)    (((B)==0) ? 0 : (( (A) + ((B)/2) ) /(B)) )
+
+
+/******************************************************************************
+Macro Name:  Limit
+Description: Limitation
+Arguments:
+  x           Value, which should be limited
+  min         Lower bound
+  max         Upper bound
+Return value: x, if x is between min and max,
+              max, if x is greater than max
+              min, if x is smaller than min
+******************************************************************************/
+#define Limit(x,min,max) (((x)>(max))?(max):(((x)<(min))?(min):(x)))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Limit
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Macro Name:  UNSIGN_INT32, UNSIGN_INT16, UNSIGN_CHAR,
+Description: cast any argument to unsigned; negative values result in 0
+Arguments:
+  x           Value, which should be casted
+Return value: x casted to unsigned, 0 if x<0
+******************************************************************************/
+#define UNSIGN_INT32(x)   ((unsigned_int32_t) MAX((x),0))
+#define UNSIGN_INT16(x)   ((unsigned_int16_t) MAX((x),0))
+#define UNSIGN_CHAR(x)    ((unsigned_char_t)  MAX((x),0))
+
+
+
+/*****************************
+**** Arithmetic functions ****
+*****************************/
+
+
+/******************************************************************************
+Extern Name: SQRT16
+Description: calculate square root (rounded) of unsigned 16-bit integer using
+             NEWTON's iteration algorithm
+******************************************************************************/
+extern unsigned_int16_t SQRT16 (unsigned_int16_t radicand);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS SQRT16
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Extern Name: SQRT32
+Description: calculate square root (rounded) of unsigned 32-bit integer using
+             NEWTON's iteration algorithm
+******************************************************************************/
+extern unsigned_int32_t SQRT32 (unsigned_int32_t radicand);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS SQRT32
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Extern Name: LOG_D_65536
+Description: calculate y = 65536*log_2(x)
+******************************************************************************/
+extern unsigned_int32_t LOG_D_65536(unsigned_int16_t x);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS LOG_D_65536
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Extern Name: EXP_D_65536
+Description: calculate y = 2^(x/65536)
+             inverse function for LOG_D_65536
+******************************************************************************/
+extern unsigned_int32_t EXP_D_65536(unsigned_int32_t x);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS EXP_D_65536
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Macro Name:  Logd_c
+Description: logarithm of 8 bits (character)
+*******************************************************************************/
+#define Logd_c(x)\
+    (((x)<128)?(((x)<64)?(((x)<32)?(((x)<16)?(((x)<8)?(((x)<4)?(((x)<2)?(((x)==0)?15:0):1):2):3):4):5):6):7)
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Logd_c
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Macro Name:  Logd
+Description: logarithm of 16 bits (integer)
+*******************************************************************************/
+#define Logd(val_1)\
+    (((val_1)>0xff)?((Logd_c((val_1)>>8))+8):(Logd_c((val_1))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Logd
+#endif  /* PRQA_SIZE_T */
+
+
+/*****************************
+****   Filter functions   ****
+*****************************/
+
+
+/******************************************************************************
+Extern Name: PT1_NON_LIN
+Description: non liniear PT1 filter
+Arguments:
+  x_value      input signal
+  value2       old output signal
+  value3       reference value for filter
+  value4       filter coefficiet, resolution: 0 - 1 = 0 - 256 digits
+Return value:  filtered value
+******************************************************************************/
+extern signed_int16_t PT1_NON_LIN (signed_int16_t x_value,
+                                   signed_int16_t value2,
+                                   signed_int16_t value3,
+                                   signed_int16_t value4);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS PT1_NON_LIN
+#endif  /* PRQA_SIZE_T */
+
+
+/******************************************************************************
+Extern Name: AYC_PT1
+Description: PT1 filter
+Arguments:
+  x_value      input value
+  value1       old output value
+  value2       filter coefficient 0 - 1 = 0 - 255
+               value2 = e^(-2*PI*fg*Looptime) * 256
+Return value:  filtered value
+******************************************************************************/
+extern signed_int16_t AYC_PT1 (signed_int16_t x_value,
+                               signed_int16_t value1,
+                               signed_int16_t value2);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS AYC_PT1
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  PT1_F_DIVIDER
+Description:
+                          1
+      formula:  -------------------- * 256
+                (2 * Pi * f * T) + 1
+
+                f: cutoff frequency
+                T: Loop time
+******************************************************************************/
+#define PT1_F_DIVIDER(const1)\
+    ((signed_int16_t)(256 / ((6.2832 * (float32)(const1) * ((float32)(Loop_time) / 1000000.0)) + 1)))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS PT1_F_DIVIDER
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  PT1_F_SAMPLE
+Description:
+                              1
+      formula:  1 + -----------------------
+                    (2 * Pi * f * ( T * n))
+
+                f: cutoff frequency (<< 0.1 Hz)
+                T: Loop time
+                n: sample time in loops
+******************************************************************************/
+#define PT1_F_SAMPLE(const1, const2)\
+    ((signed_int16_t)(1 + (1000000.0 / (6.2832 * (float32)(const1) * (float32)(Loop_time) * (float32)(const2)))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS PT1_F_SAMPLE
+#endif  /* PRQA_SIZE_T */
+
+/************************************
+****   Interpolation functions   ****
+************************************/
+
+
+/******************************************************************************
+Macro Name:  INTERPOL
+Description:
+   Define for interpolation
+
+      y1-|----o         resp.        y2-|---------o
+         |    |\                        |        /|
+         |    | \                       |       / |
+       y-|----|--\                    y-|------/  |
+         |    |  |\                     |     /|  |
+      y2-|----|--|-o                 y1-|----o |  |
+         |____|__|_|____                |____|_|__|__
+              x1 x x2                       x1 x  x2
+
+  y = y1+m*(x-x1) mit m=(y2-y1)/(x2-x1) bzw.
+  y = y1-m*(x-x1) mit m=(y1-y2)/(x2-x1)
+
+  User has to ensure that x is between x1 and x2.
+******************************************************************************/
+#define INTERPOL(x, x1, y1, x2, y2)\
+  ((signed_int16_t)((y1)+((((y2)-(y1))*((x)-(x1)))/((x2)-(x1)))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS INTERPOL
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Macro Name:  INTERPOLATE
+Description:
+   Define for interpolation. Like INTERPOL, but does not assume that values are signed_int16
+*/
+#define INTERPOLATE(x,x1,y1,x2,y2) ((y1)+((((y2)-(y1))*((x)-(x1)))/((x2)-(x1))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS INTERPOLATE
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name: INTERPOL_S16
+Description: Linear interpolation for signed_int16_t
+
+Linear interpolation in two dimensional datafields. Datapoints do not have
+to be equidistant.
+
+No extrapolation, x_values outside range of x_tab are limited.
+x_value < x_tab[0]          results in y_tab[0]
+x_value > x_tab[tab_len-1]  results in y_tab[tab_len-1]
+
+Difference between two X-datapoints must be smaller than Intmax.
+
+    y_tab[0]|--o
+            |  |
+            |  |
+            |  |
+         [1]|--|--o
+            |  |  |\
+            |  |  | \
+       Y----|--|--|--*
+            |  |  |  |\
+            |  |  |  | \
+            |  |  |  |  \
+         [2]|--|--|--|---o
+            |  |  |  |   |
+            |  |  |  |   |
+         [3]|--|--|--|---|--------------o
+            |__|__|__|___|______________|_____
+         x_tab[0][1] |  [2]            [3]
+                     |
+                 x_value
+
+Arguments:
+  x_value     x-value, for which a corresponding y-value is searched
+  x_tab       Array of x-values of the supporting points
+  y_tab       Array of the corresponding y-values
+  tab_len     Number of supporting points
+Return value: Interpolated y-value
+******************************************************************************/
+extern signed_int16_t INTERPOL_S16(signed_int16_t x_value,
+                                   const signed_int16_t x_tab[],
+                                   const signed_int16_t y_tab[],
+                                   unsigned_char_t tab_len);
+
+#define AYC_INTPOL2(x_value, x_tab, y_tab, tab_len) \
+  (INTERPOL_S16((x_value), (x_tab), (y_tab), (tab_len)))
+
+#define AYC_INTPOL2_32(x_value, x_tab, y_tab, tab_len) \
+  (INTERPOL_S16(INTLIM(x_value), (x_tab), (y_tab), (tab_len)))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS INTERPOL_S16
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name: INTERPOL_U8
+Description: Linear interpolation for unsigned_char_t
+
+Same as INTERPOL_S16, but data points are unsigned_char_t.
+
+Arguments:
+  x_value     x-value, for which a corresponding y-value is searched
+  x_tab       Array of x-values of the supporting points
+  y_tab       Array of the corresponding y-values
+  tab_len     Number of supporting points
+Return value: Interpolated y-value
+******************************************************************************/
+extern unsigned_char_t INTERPOL_U8(unsigned_char_t x_value,
+                                   const unsigned_char_t x_tab[],
+                                   const unsigned_char_t y_tab[],
+                                   unsigned_char_t tab_len);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS INTERPOL_U8
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name: INTERPOL_U16
+Description: Linear interpolation for unsigned_int16_t
+
+Same as INTERPOL_S16, but data points are unsigned_int16_t.
+
+Arguments:
+  x_value     x-value, for which a corresponding y-value is searched
+  x_tab       Array of x-values of the supporting points
+  y_tab       Array of the corresponding y-values
+  tab_len     Number of supporting points
+Return value: Interpolated y-value
+******************************************************************************/
+extern unsigned_int16_t INTERPOL_U16(unsigned_int16_t x_value,
+                                     const unsigned_int16_t x_tab[],
+                                     const unsigned_int16_t y_tab[],
+                                     unsigned_char_t tab_len);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS INTERPOL_U16
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Functions and macros for handling of polygons defined in parameter database.
+******************************************************************************/
+
+/******************************************************************************
+  Samplepoint Polygons are defined as array structured in following way:
+  table[] =
+  {
+    Number of points,
+    X1,    X2,...
+    Y1,    Y2,...
+  }
+******************************************************************************/
+
+#define INTERPOL_SAMPLEPOINTS_U16(x,tab) INTERPOL_U16((x),&(tab)[1],&(tab)[1+(tab)[0]],(unsigned_char_t)(tab)[0])
+#define INTERPOL_SAMPLEPOINTS_S16(x,tab) INTERPOL_S16((x),&(tab)[1],&(tab)[1+(tab)[0]],(unsigned_char_t)(tab)[0])
+
+
+/******************************************************************************
+  Polygons are defined as array structured in following way:
+  signed_int16_t table[] =
+  {
+    Min,Max,
+    Number of ranges,
+    X1,    X2,...
+    Off0  ,Off1,  Off2,...
+    Grad0, Grad1, Grad2,...
+  }
+  format of Grad: (Y2-Y1)/(X2-X1) * 1024
+******************************************************************************/
+
+/* structure of table for CALCULATE_THRESHOLD_FROM_PARAMTABLE */
+enum
+{
+  Polygon_pos_min = 0, /* position 0 = min */
+  Polygon_pos_max,     /* position 1 = max */
+  Polygon_pos_n,       /* position 2 = number of ranges */
+  Polygon_pos_range    /* position 3... = ranges */
+};
+
+
+/******************************************************************************
+Extern Name:  CALCULATE_THRESHOLD_FROM_PARAMTABLE
+Description:  function needs start-adress of polygon in parameter table
+              and value on x-axle. Function returns y(x)
+Arguments:
+  table       start adress of polygon in parameter table
+  x           x-value
+Return value: y(x)
+******************************************************************************/
+extern signed_int32_t CALCULATE_THRESHOLD_FROM_PARAMTABLE
+                      (const signed_int16_t *table,
+                       signed_int32_t x);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS CALCULATE_THRESHOLD_FROM_PARAMTABLE
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+  Resolution of gradient in polynom definition in parameter table
+  grad = (Y2-Y1)/(X2-X1) * 1024
+******************************************************************************/
+#define Polygon_gradient_resolution 1024
+
+/******************************************************************************
+Extern Name:  POLYGON_SECTION
+Description:  function needs start-adress of polygon in parameter table
+              and value on x-axle. Function returns identifier of the polygon
+              section (to be used by Get_polygon_section_... macros
+Arguments:
+  table       start adress of polygon in parameter table
+  x           x-value
+Return value: identifier for the polygon section, which contains x
+******************************************************************************/
+extern unsigned_int32_t POLYGON_SECTION(const signed_int16_t *table,
+                                        signed_int32_t x);
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS POLYGON_SECTION
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name: CALCULATE_GRADIENT
+Description: Calculates a gradient with a target resolution
+             Value of Ramp_time has to be in miliseconds
+Arguments:   signed_int16_t current_value
+             signed_int16_t target_value
+             unsigned_int16_t ramp_time
+             unsigned_int16_t input_resolution
+             unsigned_int16_t target_resolution
+             gradient_return_t *calculated_gradient
+Return value:TRUE if gradient is valid
+******************************************************************************/
+unsigned_char_t CALCULATE_GRADIENT(signed_int16_t current_value,signed_int16_t target_value,
+                          unsigned_int16_t ramp_time,unsigned_int16_t input_resolution,
+                          unsigned_int16_t target_resolution,gradient_return_t *calculated_gradient);
+
+/******************************************************************************
+Extern Name:  Get_polygon_section_offset
+Arguments:
+  table       start adress of polygon in parameter table
+  section     section identifier (from POLYGON_SECTION)
+Return value: y-axle offset of the polygon section
+******************************************************************************/
+#define Get_polygon_section_offset(table, section)   \
+  ((table)[(Polygon_pos_range-1)+(table)[Polygon_pos_n]+(section)])
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Get_polygon_section_offset
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name:  Get_polygon_section_gradient
+Arguments:
+  table       start adress of polygon in parameter table
+  section     section identifier (from POLYGON_SECTION)
+Return value: gradient of the polygon section,
+              multiplied by Polygon_gradient_resolution
+******************************************************************************/
+#define Get_polygon_section_gradient(table, section) \
+  ((table)[(Polygon_pos_range-1)+(2*(table)[Polygon_pos_n])+(section)])
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Get_polygon_section_gradient
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name:  Get_polygon_section_start_x
+Arguments:
+  table       start adress of polygon in parameter table
+  section     section identifier (from POLYGON_SECTION)
+Return value: x-value of the sections starting point
+******************************************************************************/
+#define Get_polygon_section_start_x(table, section)  \
+  (((section)==0)?Shrt_min:(table)[(Polygon_pos_range-1)+(section)])
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Get_polygon_section_start_x
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name:  Get_polygon_section_end_x
+Arguments:
+  table       start adress of polygon in parameter table
+  section     section identifier (from POLYGON_SECTION)
+Return value: x-value of the sections ending point
+******************************************************************************/
+#define Get_polygon_section_end_x(table, section)    \
+  (((section)==((table)[Polygon_pos_n]-1))?Shrt_max:(table)[Polygon_pos_range+(section)])
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Get_polygon_section_end_x
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name:  Get_polygon_section_value
+Arguments:
+  table       start adress of polygon in parameter table
+  section     section identifier (from POLYGON_SECTION)
+Return value: y-value, corresponding to the given x-value
+******************************************************************************/
+#define Get_polygon_section_value(table, section, x) \
+  (Limit((signed_int32_t)Get_polygon_section_offset((table), (section))                              \
+         + (((signed_int32_t)Get_polygon_section_gradient((table), (section)) * (signed_int32_t)(x)) \
+            / (signed_int32_t)Polygon_gradient_resolution),                                          \
+         (table)[Polygon_pos_min], (table)[Polygon_pos_max]))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Get_polygon_section_value
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name:  Get_polygon_section_start_y
+Arguments:
+  table       start adress of polygon in parameter table
+  section     section identifier (from POLYGON_SECTION)
+Return value: y-value of the sections starting point
+******************************************************************************/
+#define Get_polygon_section_start_y(table, section)  \
+  (Get_polygon_section_value((table), (section), Get_polygon_section_start_x((table), (section))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Get_polygon_section_start_y
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name:  Get_polygon_section_end_y
+Arguments:
+  table       start adress of polygon in parameter table
+  section     section identifier (from POLYGON_SECTION)
+Return value: y-value of the sections ending point
+******************************************************************************/
+#define Get_polygon_section_end_y(table, section)    \
+  (Get_polygon_section_value((table), (section), Get_polygon_section_end_x((table), (section))))
+#ifdef PRQA_SIZE_T
+#pragma PRQA_NO_SIDE_EFFECTS Get_polygon_section_end_y
+#endif  /* PRQA_SIZE_T */
+
+/******************************************************************************
+Extern Name:  COS_APPROX
+Description:  Approximate cosine function with power series
+
+             inf
+            -----         n
+             \        (-1)      (2*n)
+   cos(x) =   >     -------- * x
+             /       (2*n)!
+            -----
+             n=0
+
+   approximated to order n=1: cos(x) = 1 - 1/2*x^2
+
+   input value has to be scaled with 0.001  [rad]
+   result value is scaled with       0.0001 [rad]
+
+   used constants: PI = 3142, HALF_PI = 1571
+
+-------------------------------------------------------------------------------
+ NOTICE: This function is defined in the range ~ -PI/6 (-540) to ~ +PI/6 (540)!
+         Greater values for the approximation lead to unacceptable errors. A
+         qualifier is used to mark the valid range for the result. The valid
+         result range is derived from the AYC range of application (~ +/- 30°).
+-------------------------------------------------------------------------------
+     Example: in_value    = 400    (400 = 0.4 rad)
+              out_value   = 9200   (9200 = 0.9200 rad)
+                                                     -> qualifier = 0
+             [exact result: cos(0.4) = 0.921061]
+
+             in_value    = 1200   (1200 = 1.2 rad)   -> qualifier = 1
+-------------------------------------------------------------------------------
+Arguments:
+              signed_int16_t in_value     - cosine argument in [rad]
+              signed_int16_t *out_value   - result in [rad]
+Return value: qualifier                   - FALSE if valid, TRUE if not valid
+******************************************************************************/
+extern signed_char_t COS_APPROX (signed_int16_t in_value, signed_int16_t *out_value);
+
+/******************************************************************************
+Extern Name:  SIN_APPROX
+Description:  Approximate sine function with power series
+
+             inf
+            -----          n
+             \         (-1)       (2*n+1)
+   sin(x) =   >     ---------- * x
+             /       (2*n+1)!
+            -----
+             n=0
+
+   approximated to order n=1: sin(x) = x - 1/6*x^3
+
+   input value has to be scaled with 0.001  [rad]
+   result value is scaled with       0.0001 [rad]
+
+   used constants: PI = 3142, HALF_PI = 1571
+
+-------------------------------------------------------------------------------
+ NOTICE: This function is defined in the range ~ -PI/6 (-540) to ~ +PI/6 (540)!
+         Greater values for the approximation lead to unacceptable errors. A
+         qualifier is used to mark the valid range for the result. The valid
+         result range is derived from the AYC range of application (~ +/- 30°).
+-------------------------------------------------------------------------------
+    Example: in_value    = 400    (400  = 0.4 rad)
+             out_value   = 3894   (3894 = 0.3894 rad)
+                                                     -> qualifier = 0
+             [exact result: sin(0.4) = 0.389418]
+
+             in_value    = 1200   (1200 = 1.2 rad)   -> qualifier = 1
+
+-------------------------------------------------------------------------------
+Arguments:
+              signed_int16_t in_value     - sine argument in [rad]
+              signed_int16_t *out_value   - result in [rad]
+Return value: qualifier                   - FALSE if valid, TRUE if not valid
+******************************************************************************/
+extern signed_char_t SIN_APPROX (signed_int16_t in_value, signed_int16_t *out_value);
+
+#endif
+

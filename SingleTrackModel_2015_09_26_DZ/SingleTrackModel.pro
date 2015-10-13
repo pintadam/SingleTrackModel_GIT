@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     MDF/MDFID.cpp \
     MDF/MDFLib.cpp \
     MDF/MDFPR.cpp \
-    MDF/MDFTX.cpp
+    MDF/MDFTX.cpp \
+    ayc_yref.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot/qcustomplot.h \
@@ -47,6 +48,11 @@ HEADERS  += mainwindow.h \
     MDF/MDFID.h \
     MDF/MDFLib.h \
     MDF/MDFPR.h \
-    MDF/MDFTX.h
+    MDF/MDFTX.h \
+    ayc_yref.h \
+    hal_base_type_if.he \
+    math_lib.he \
+    ayc_stm_para.h \
+    ayc_init.h
 
 FORMS    += mainwindow.ui
