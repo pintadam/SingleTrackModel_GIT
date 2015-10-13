@@ -52,7 +52,7 @@ public:
 
     QGridLayout *InitMeasurementsLayout();
     QVBoxLayout *InitEstimationSubLayout();
-    mySignal *RawYR;
+    mySignal *RawYR, *AYC_VREF, *FSTANGLE, *FSTANGLEP, *FYAWRATE, *FYAWACC, *YAWRREF, *AFLATACCC, *COUNTER_ST, *DPSIPIN, *BETAPIN, *RAWSWA;
     ~MainWindow();
 
 private slots:

@@ -22,7 +22,9 @@ QGroupBox *Data[MaximumMeasurements], *SumData;
 QVBoxLayout *VerticalLayout[MaximumMeasurements], *SumVerticalLayout;
 QLabel *Euler[MaximumMeasurements], *Normal[MaximumMeasurements], *Other[MaximumMeasurements], *EulerSumLabel, *NormalSumLabel, *OtherSumLabel;
 QCustomPlot *Customplott[MaximumMeasurements];
-QVector<double> Time[MaximumMeasurements], Values[MaximumMeasurements], temporary(5000);
+QVector<double> Time[MaximumMeasurements], MeasuredYawRateValues[MaximumMeasurements],EstimatedYawRateValues[MaximumMeasurements], temporary(5000);
+
+//QString *FYAWRATE_Name = "FYAWRATE";
 
 double EulerValue[MaximumMeasurements], NormalValue[MaximumMeasurements], OtherValue[MaximumMeasurements];
 double EulerSumValue, NormalSumValue, OtherSumValue, SumDelta;
@@ -165,18 +167,20 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                     {
                         /* Clearing containers before reading new measurements */
                         Time[Number].clear();
-                        Values[Number].clear();
+                        MeasuredYawRateValues[Number].clear();
+                        EstimatedYawRateValues[Number].clear();
 
                         ProgressBar.setValue(Number);
                         QApplication::processEvents();
                         openMDF(LoadDASMeasurement[Number]);
 
-                        Time[Number] = RawYR->getTime();
-                        Values[Number] = RawYR->getData();
+                        Time[Number] = FYAWRATE->getTime();
+                        MeasuredYawRateValues[Number] = FYAWRATE->getData();
+                        EstimatedYawRateValues[Number] = YAWRREF->getData();
 
-                        for (int l = 1; l < (Values[Number].count()); l++)
+                        for (int l = 1; l < (MeasuredYawRateValues[Number].count()); l++)
                         {
-                            temporary[l] = (Values[Number][l]) + 2;
+                            temporary[l] = (MeasuredYawRateValues[Number][l]) + 2;
                         }
 
                         /* create and configure plottables */
@@ -184,11 +188,11 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                         QCPGraph *SecondaryGraph = Customplott[Number]->addGraph();
 
                         mainGraph->setAdaptiveSampling(true);
-                        mainGraph->setData(Time[Number], Values[Number]);
+                        mainGraph->setData(Time[Number], MeasuredYawRateValues[Number]);
                         mainGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssNone, QPen(Qt::red), QBrush(Qt::white), 3));
                         mainGraph->setPen(QPen(QColor( 00,  150,  00), 1)); // Magic only happens, when line width == 1
 
-                        SecondaryGraph->setData(Time[Number], temporary);
+                        SecondaryGraph->setData(Time[Number], EstimatedYawRateValues[Number]);
                         SecondaryGraph->setPen(QPen(Qt::red));
 
                         Customplott[Number]->setObjectName("YawRate");
@@ -231,12 +235,14 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
             QApplication::processEvents();
             openMDF(LoadDASMeasurement[0]);
 
-            Time[0] = RawYR->getTime();
-            Values[0] = RawYR->getData();
+            Time[0] = FYAWRATE->getTime();
+            MeasuredYawRateValues[0] = FYAWRATE->getData();
 
-            for (int l = 1; l < (Values[0].count()); l++)
+            EstimatedYawRateValues[0] = YAWRREF->getData();
+
+            for (int l = 1; l < (MeasuredYawRateValues[0].count()); l++)
             {
-                temporary[l] = (Values[0][l]) + 2;
+                temporary[l] = (MeasuredYawRateValues[0][l]) + 2;
             }
 
             /* create and configure plottables */
@@ -244,11 +250,11 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
             QCPGraph *SecondaryGraph = Customplott[0]->addGraph();
 
             mainGraph->setAdaptiveSampling(true);
-            mainGraph->setData(Time[0], Values[0]);
+            mainGraph->setData(Time[0], MeasuredYawRateValues[0]);
             mainGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssNone, QPen(Qt::red), QBrush(Qt::white), 3));
             mainGraph->setPen(QPen(QColor( 00,  150,  00), 1)); // Magic only happens, when line width == 1
 
-            SecondaryGraph->setData(Time[0], temporary);
+            SecondaryGraph->setData(Time[0], EstimatedYawRateValues[0]);
             SecondaryGraph->setPen(QPen(Qt::red));
 
             Customplott[0]->setObjectName("YawRate");
@@ -330,6 +336,8 @@ void MainWindow::openMDF(QString name)
     notSelectedSignals.clear();
     //signalNameList = new QList<QString>();
 
+    /* Debug Változó */
+    int debugg = 0;
 
     int numberOfSignals = 0;
     bool error = mdf->Open(& name);
@@ -356,10 +364,99 @@ void MainWindow::openMDF(QString name)
 
                     mySignal* signal = new mySignal(*cnIt);
                     /* feltétel a beolvasáshoz */
-                    if(signal->getName()->contains("YAWRREFMINMAX"))
+                    if(signal->getName()->compare("XCP_DAQ.Main.MAIN_CLOCK") == 0)
                     {
+                        qDebug() << "MAIN_CLOCK:" << *signal->getName();
                         RawYR = signal;
                         RawYR->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.FYAWRATE") == 0)
+                    {
+
+                        qDebug() << "FYAWRATE:" << *signal->getName();
+                        FYAWRATE = signal;
+                        FYAWRATE->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.AYC_VREF") == 0)
+                    {
+
+                        qDebug() << "AYC_VREF:" << *signal->getName();
+                        AYC_VREF = signal;
+                        AYC_VREF->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.FSTANGLE") == 0)
+                    {
+
+                        qDebug() << "FSTANGLE:" << *signal->getName();
+                        FSTANGLE = signal;
+                        FSTANGLE->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.FSTANGLEP") == 0)
+                    {
+
+                        qDebug() << "FSTANGLEP:" << *signal->getName();
+                        FSTANGLEP = signal;
+                        FSTANGLEP->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.FYAWACC") == 0)
+                    {
+
+                        qDebug() << "FYAWACC:" << *signal->getName();
+                        FYAWACC = signal;
+                        FYAWACC->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.YAWRREF") == 0)
+                    {
+
+                        qDebug() << "YAWRREF:" << *signal->getName();
+                        YAWRREF = signal;
+                        YAWRREF->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.AFLATACCC") == 0)
+                    {
+
+                        qDebug() << "AFLATACCC:" << *signal->getName();
+                        AFLATACCC = signal;
+                        AFLATACCC->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.COUNTER_ST") == 0)
+                    {
+
+                        qDebug() << "COUNTER_ST:" << *signal->getName();
+                        COUNTER_ST = signal;
+                        COUNTER_ST->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.DPSIPIN") == 0)
+                    {
+
+                        qDebug() << "DPSIPIN:" << *signal->getName();
+                        DPSIPIN = signal;
+                        DPSIPIN->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.BETAPIN") == 0)
+                    {
+
+                        qDebug() << "BETAPIN:" << *signal->getName();
+                        BETAPIN = signal;
+                        BETAPIN->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.RAWSWA") == 0)
+                    {
+
+                        qDebug() << "RAWSWA:" << *signal->getName();
+                        RAWSWA = signal;
+                        RAWSWA->loadData();
                     }
 
                     allSignal->insert(*signal->getName(), signal);
