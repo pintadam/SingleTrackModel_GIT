@@ -112,26 +112,23 @@
 /***********************************************************************************************/
 
 
-#define COD_c_f                    Ayc_esm_c_f                     /*LSB =     16 N/rad */
-#define COD_c_r                    Ayc_esm_c_r                     /*LSB =     16 N/rad */
-#define COD_l_f                    Ayc_esm_l_f                     /*LSB = 1/1024 m     */
-#define COD_l_r                    Ayc_esm_l_r                     /*LSB = 1/1024 m     */
-#define COD_h_cog                  Ayc_esm_h_cog                   /*LSB = 1/1024 m     */
-#define COD_mass                   Ayc_esm_m                       /*LSB =      1 kg    */
-#define COD_theta                  Ayc_esm_theta                   /*LSB =      1 kg*m^2*/
-#define COD_track_fa               Ayc_esm_track_fa                /*LSB = 1/1024 m     */
-#define COD_track_ra               Ayc_esm_track_ra                /*LSB = 1/1024 m     */
-#define Esm_max_delta_fflat_x      Cod_stm_max_delta_fflat_x       /*LSB =  1/100       */
-#define Ayc_esm_max_delta_fflat_y  Cod_stm_max_delta_fflat_y       /*LSB =  1/100       */
-#define COD_lat_force_delay_vel_tab_val1    Ayc_lat_force_delay_vel_tab[0]    /*LSB = 1/100  kph   */
-#define COD_lat_force_delay_vel_tab_val2    Ayc_lat_force_delay_vel_tab[1]    /*LSB = 1/100  kph   */
-#define COD_lat_force_delay_vel_tab_val3    Ayc_lat_force_delay_vel_tab[2]    /*LSB = 1/100  kph   */
-#define COD_lat_force_delay_vel_tab_val4    Ayc_lat_force_delay_vel_tab[3]    /*LSB = 1/100  kph   */
+#define COD_c_f                    7500                     /*LSB =     16 N/rad */
+#define COD_c_r                    8125                     /*LSB =     16 N/rad */
+#define COD_l_f                    1052                     /*LSB = 1/1024 m     */
+#define COD_l_r                    1513                             /*LSB = 1/1024 m     */
+#define COD_h_cog                  461                   /*LSB = 1/1024 m     */
+#define COD_mass                   1525                       /*LSB =      1 kg    */
+#define COD_theta                  2350                   /*LSB =      1 kg*m^2*/
+#define COD_track_fa               1610                /*LSB = 1/1024 m     */
+#define COD_track_ra               1592                /*LSB = 1/1024 m     */
+#define Esm_max_delta_fflat_x      10000       /*LSB =  1/100       */
+#define Ayc_esm_max_delta_fflat_y  50       /*LSB =  1/100       */
 #define COD_lat_force_delay_fconst_tab_val1 Ayc_lat_force_delay_fconst_tab[0] /*LSB = 1/1          */
 #define COD_lat_force_delay_fconst_tab_val2 Ayc_lat_force_delay_fconst_tab[1] /*LSB = 1/1          */
 #define COD_lat_force_delay_fconst_tab_val3 Ayc_lat_force_delay_fconst_tab[2] /*LSB = 1/1          */
 #define COD_lat_force_delay_fconst_tab_val4 Ayc_lat_force_delay_fconst_tab[3] /*LSB = 1/1          */
-#define Esm_c1_fflatlim_corr_fac            Ayc_esm_c1_fflatlim_corr_fac      /*LSB = 1/100        */
+
+#define Esm_c1_fflatlim_corr_fac  100     /*LSB = 1/100        */
 
 
 #if (AYC_COD_ESM == 2 && CFG_CUSTOMER == cCFG_BMW)  /*EEPROM-Version BMW*/
@@ -183,6 +180,10 @@
 #define Adapt_c_r_num_1            ADAPT_C_R_NUM_1
 #define Esm_max_delta_fflat_y_ms   ESM_MAX_DELTA_FFLAT_Y_MS
 #define Esm_lat_force_delay_vel_tab    ESM_LAT_FORCE_DELAY_VEL_TAB
+#define COD_lat_force_delay_vel_tab_val1    Ayc_lat_force_delay_vel_tab[0]    /*LSB = 1/100  kph   */
+#define COD_lat_force_delay_vel_tab_val2    Ayc_lat_force_delay_vel_tab[1]    /*LSB = 1/100  kph   */
+#define COD_lat_force_delay_vel_tab_val3    Ayc_lat_force_delay_vel_tab[2]    /*LSB = 1/100  kph   */
+#define COD_lat_force_delay_vel_tab_val4    Ayc_lat_force_delay_vel_tab[3]    /*LSB = 1/100  kph   */
 #define Esm_lat_force_delay_fconst_tab ESM_LAT_FORCE_DELAY_FCONST_TAB
 
 /* ---- Defines for ROM-Version for codable bike model (CSI) ----- */

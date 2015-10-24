@@ -52,7 +52,9 @@ public:
 
     QGridLayout *InitMeasurementsLayout();
     QVBoxLayout *InitEstimationSubLayout();
-    mySignal *RawYR, *AYC_VREF, *FSTANGLE, *FSTANGLEP, *FYAWRATE, *FYAWACC, *YAWRREF, *AFLATACCC, *COUNTER_ST, *DPSIPIN, *BETAPIN, *RAWSWA;
+    mySignal *RawYR, *EstimatedYawRate;
+    mySignal *AYC_VREF, *FSTANGLE, *FSTANGLEP, *FYAWRATE, *FYAWACC, *YAWRREF, *AFLATACCC, *COUNTER_ST, *DPSIPIN, *BETAPIN, *RAWSWA, *SLP_ANG_REF, *AYCESTIMMY;
+    QVector<double> Calculate_Estimated_Yaw_Rate(int loopcount, int NumberOfMeasurement);
     ~MainWindow();
 
 private slots:

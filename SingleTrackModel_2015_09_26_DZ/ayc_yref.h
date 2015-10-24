@@ -138,8 +138,10 @@ typedef struct
    unsigned int            MY_CORRECTION        : 1;             /*@ NAME:MY_CORR      REM:my correction activ or not @*/
 } ayc_friction_bits_t;
 
-signed_int16_t             AYC_REFERENCE_VELOCITY;
-signed_int16_t             AYC_CONTROL_DEVIATION;
+/* Extern is really necessary?? */
+extern signed_int16_t             AYC_REFERENCE_VELOCITY;
+extern signed_int16_t             AYC_CONTROL_DEVIATION;
+/* Exterm is really necessary?? */
 
 /******************************************************************************
  * 'B I T - S T R U C T U R E S'                                              *
@@ -160,7 +162,7 @@ signed_int16_t             AYC_CONTROL_DEVIATION;
 
  extern unsigned_char_t  AYC_ESTIMATED_MY;
 
- extern signed_int16_t                         AYC_SLIP_ANGLE_REF;              /*@ LSB:1.526e-3 UNIT:deg     NAME:SLP_ANG_REF  REM:side slip of single track model @*/
+ extern double                         AYC_SLIP_ANGLE_REF;              /*@ LSB:1.526e-3 UNIT:deg     NAME:SLP_ANG_REF  REM:side slip of single track model @*/
  extern signed_int16_t                         AYC_YAW_RATE_MODEL;              /*@ LSB:2.865e-3 UNIT:deg/s   NAME:YAWRATE_MODL REM:yawrate of single track model @*/
  extern signed_int16_t                         AYC_SLIP_ANGLE_RATE_REF;         /*@ LSB:0.18336  UNIT:deg/s   NAME:SLP_ANG_RATE REM:side slip acceleration of single track model kept in mind for Runge-Kutta Integration @*/
 
@@ -282,7 +284,7 @@ signed_int16_t             AYC_CONTROL_DEVIATION;
  * 'F U N C T I O N - P R O T O T Y P E S'                                    *
  ******************************************************************************/
 
- extern void CALC_AYC_YAW_RATE_REF (void);
+ extern double CALC_AYC_YAW_RATE_REF(double ayc_velocity_reference, double ayc_req_str, double ayc_model, double ayc_slip_angle, double AYC_ESTIM_MY);
  extern void CALC_AYC_YAW_RATE_REF_2 (void);
 
 
