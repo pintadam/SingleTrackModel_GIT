@@ -2230,8 +2230,8 @@ void QCPAbstractItem::selectableChanged(bool _t1)
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 struct qt_meta_stringdata_QCustomPlot_t {
-    QByteArrayData data[57];
-    char stringdata[801];
+    QByteArrayData data[59];
+    char stringdata[830];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -2279,24 +2279,26 @@ QT_MOC_LITERAL(35, 447, 11), // "afterReplot"
 QT_MOC_LITERAL(36, 459, 11), // "rescaleAxes"
 QT_MOC_LITERAL(37, 471, 21), // "onlyVisiblePlottables"
 QT_MOC_LITERAL(38, 493, 11), // "deselectAll"
-QT_MOC_LITERAL(39, 505, 6), // "replot"
-QT_MOC_LITERAL(40, 512, 28), // "QCustomPlot::RefreshPriority"
-QT_MOC_LITERAL(41, 541, 15), // "refreshPriority"
-QT_MOC_LITERAL(42, 557, 8), // "viewport"
-QT_MOC_LITERAL(43, 566, 10), // "background"
-QT_MOC_LITERAL(44, 577, 16), // "backgroundScaled"
-QT_MOC_LITERAL(45, 594, 20), // "backgroundScaledMode"
-QT_MOC_LITERAL(46, 615, 19), // "Qt::AspectRatioMode"
-QT_MOC_LITERAL(47, 635, 10), // "plotLayout"
-QT_MOC_LITERAL(48, 646, 14), // "QCPLayoutGrid*"
-QT_MOC_LITERAL(49, 661, 24), // "autoAddPlottableToLegend"
-QT_MOC_LITERAL(50, 686, 18), // "selectionTolerance"
-QT_MOC_LITERAL(51, 705, 20), // "noAntialiasingOnDrag"
-QT_MOC_LITERAL(52, 726, 19), // "multiSelectModifier"
-QT_MOC_LITERAL(53, 746, 20), // "Qt::KeyboardModifier"
-QT_MOC_LITERAL(54, 767, 15), // "LayerInsertMode"
-QT_MOC_LITERAL(55, 783, 8), // "limBelow"
-QT_MOC_LITERAL(56, 792, 8) // "limAbove"
+QT_MOC_LITERAL(39, 505, 16), // "showPointToolTip"
+QT_MOC_LITERAL(40, 522, 6), // "replot"
+QT_MOC_LITERAL(41, 529, 28), // "QCustomPlot::RefreshPriority"
+QT_MOC_LITERAL(42, 558, 15), // "refreshPriority"
+QT_MOC_LITERAL(43, 574, 11), // "DoneEditing"
+QT_MOC_LITERAL(44, 586, 8), // "viewport"
+QT_MOC_LITERAL(45, 595, 10), // "background"
+QT_MOC_LITERAL(46, 606, 16), // "backgroundScaled"
+QT_MOC_LITERAL(47, 623, 20), // "backgroundScaledMode"
+QT_MOC_LITERAL(48, 644, 19), // "Qt::AspectRatioMode"
+QT_MOC_LITERAL(49, 664, 10), // "plotLayout"
+QT_MOC_LITERAL(50, 675, 14), // "QCPLayoutGrid*"
+QT_MOC_LITERAL(51, 690, 24), // "autoAddPlottableToLegend"
+QT_MOC_LITERAL(52, 715, 18), // "selectionTolerance"
+QT_MOC_LITERAL(53, 734, 20), // "noAntialiasingOnDrag"
+QT_MOC_LITERAL(54, 755, 19), // "multiSelectModifier"
+QT_MOC_LITERAL(55, 775, 20), // "Qt::KeyboardModifier"
+QT_MOC_LITERAL(56, 796, 15), // "LayerInsertMode"
+QT_MOC_LITERAL(57, 812, 8), // "limBelow"
+QT_MOC_LITERAL(58, 821, 8) // "limAbove"
 
     },
     "QCustomPlot\0mouseDoubleClick\0\0"
@@ -2312,14 +2314,16 @@ QT_MOC_LITERAL(56, 792, 8) // "limAbove"
     "title\0titleDoubleClick\0selectionChangedByUser\0"
     "beforeReplot\0afterReplot\0rescaleAxes\0"
     "onlyVisiblePlottables\0deselectAll\0"
-    "replot\0QCustomPlot::RefreshPriority\0"
-    "refreshPriority\0viewport\0background\0"
-    "backgroundScaled\0backgroundScaledMode\0"
-    "Qt::AspectRatioMode\0plotLayout\0"
-    "QCPLayoutGrid*\0autoAddPlottableToLegend\0"
-    "selectionTolerance\0noAntialiasingOnDrag\0"
-    "multiSelectModifier\0Qt::KeyboardModifier\0"
-    "LayerInsertMode\0limBelow\0limAbove"
+    "showPointToolTip\0replot\0"
+    "QCustomPlot::RefreshPriority\0"
+    "refreshPriority\0DoneEditing\0viewport\0"
+    "background\0backgroundScaled\0"
+    "backgroundScaledMode\0Qt::AspectRatioMode\0"
+    "plotLayout\0QCPLayoutGrid*\0"
+    "autoAddPlottableToLegend\0selectionTolerance\0"
+    "noAntialiasingOnDrag\0multiSelectModifier\0"
+    "Qt::KeyboardModifier\0LayerInsertMode\0"
+    "limBelow\0limAbove"
 };
 #undef QT_MOC_LITERAL
 
@@ -2329,39 +2333,41 @@ static const uint qt_meta_data_QCustomPlot[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      23,   14, // methods
-       9,  214, // properties
-       1,  241, // enums/sets
+      25,   14, // methods
+       9,  230, // properties
+       1,  257, // enums/sets
        0,    0, // constructors
        0,       // flags
       18,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,  129,    2, 0x06 /* Public */,
-       5,    1,  132,    2, 0x06 /* Public */,
-       6,    1,  135,    2, 0x06 /* Public */,
-       7,    1,  138,    2, 0x06 /* Public */,
-       8,    1,  141,    2, 0x06 /* Public */,
-      10,    2,  144,    2, 0x06 /* Public */,
-      13,    2,  149,    2, 0x06 /* Public */,
-      14,    2,  154,    2, 0x06 /* Public */,
-      17,    2,  159,    2, 0x06 /* Public */,
-      18,    3,  164,    2, 0x06 /* Public */,
-      23,    3,  171,    2, 0x06 /* Public */,
-      24,    3,  178,    2, 0x06 /* Public */,
-      28,    3,  185,    2, 0x06 /* Public */,
-      29,    2,  192,    2, 0x06 /* Public */,
-      32,    2,  197,    2, 0x06 /* Public */,
-      33,    0,  202,    2, 0x06 /* Public */,
-      34,    0,  203,    2, 0x06 /* Public */,
-      35,    0,  204,    2, 0x06 /* Public */,
+       1,    1,  139,    2, 0x06 /* Public */,
+       5,    1,  142,    2, 0x06 /* Public */,
+       6,    1,  145,    2, 0x06 /* Public */,
+       7,    1,  148,    2, 0x06 /* Public */,
+       8,    1,  151,    2, 0x06 /* Public */,
+      10,    2,  154,    2, 0x06 /* Public */,
+      13,    2,  159,    2, 0x06 /* Public */,
+      14,    2,  164,    2, 0x06 /* Public */,
+      17,    2,  169,    2, 0x06 /* Public */,
+      18,    3,  174,    2, 0x06 /* Public */,
+      23,    3,  181,    2, 0x06 /* Public */,
+      24,    3,  188,    2, 0x06 /* Public */,
+      28,    3,  195,    2, 0x06 /* Public */,
+      29,    2,  202,    2, 0x06 /* Public */,
+      32,    2,  207,    2, 0x06 /* Public */,
+      33,    0,  212,    2, 0x06 /* Public */,
+      34,    0,  213,    2, 0x06 /* Public */,
+      35,    0,  214,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      36,    1,  205,    2, 0x0a /* Public */,
-      36,    0,  208,    2, 0x2a /* Public | MethodCloned */,
-      38,    0,  209,    2, 0x0a /* Public */,
-      39,    1,  210,    2, 0x0a /* Public */,
-      39,    0,  213,    2, 0x2a /* Public | MethodCloned */,
+      36,    1,  215,    2, 0x0a /* Public */,
+      36,    0,  218,    2, 0x2a /* Public | MethodCloned */,
+      38,    0,  219,    2, 0x0a /* Public */,
+      39,    2,  220,    2, 0x0a /* Public */,
+      40,    1,  225,    2, 0x0a /* Public */,
+      40,    0,  228,    2, 0x2a /* Public | MethodCloned */,
+      43,    0,  229,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
@@ -2387,26 +2393,28 @@ static const uint qt_meta_data_QCustomPlot[] = {
     QMetaType::Void, QMetaType::Bool,   37,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 40,   41,
+    QMetaType::Void, 0x80000000 | 11, 0x80000000 | 3,   12,    4,
+    QMetaType::Void, 0x80000000 | 41,   42,
+    QMetaType::Void,
     QMetaType::Void,
 
  // properties: name, type, flags
-      42, QMetaType::QRect, 0x00095103,
-      43, QMetaType::QPixmap, 0x00095103,
-      44, QMetaType::Bool, 0x00095103,
-      45, 0x80000000 | 46, 0x0009510b,
-      47, 0x80000000 | 48, 0x00095009,
-      49, QMetaType::Bool, 0x00095103,
-      50, QMetaType::Int, 0x00095103,
+      44, QMetaType::QRect, 0x00095103,
+      45, QMetaType::QPixmap, 0x00095103,
+      46, QMetaType::Bool, 0x00095103,
+      47, 0x80000000 | 48, 0x0009510b,
+      49, 0x80000000 | 50, 0x00095009,
       51, QMetaType::Bool, 0x00095103,
-      52, 0x80000000 | 53, 0x0009510b,
+      52, QMetaType::Int, 0x00095103,
+      53, QMetaType::Bool, 0x00095103,
+      54, 0x80000000 | 55, 0x0009510b,
 
  // enums: name, flags, count, data
-      54, 0x0,    2,  245,
+      56, 0x0,    2,  261,
 
  // enum data: key, value
-      55, uint(QCustomPlot::limBelow),
-      56, uint(QCustomPlot::limAbove),
+      57, uint(QCustomPlot::limBelow),
+      58, uint(QCustomPlot::limAbove),
 
        0        // eod
 };
@@ -2437,8 +2445,10 @@ void QCustomPlot::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 18: _t->rescaleAxes((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 19: _t->rescaleAxes(); break;
         case 20: _t->deselectAll(); break;
-        case 21: _t->replot((*reinterpret_cast< QCustomPlot::RefreshPriority(*)>(_a[1]))); break;
-        case 22: _t->replot(); break;
+        case 21: _t->showPointToolTip((*reinterpret_cast< QCPAbstractPlottable*(*)>(_a[1])),(*reinterpret_cast< QMouseEvent*(*)>(_a[2]))); break;
+        case 22: _t->replot((*reinterpret_cast< QCustomPlot::RefreshPriority(*)>(_a[1]))); break;
+        case 23: _t->replot(); break;
+        case 24: _t->DoneEditing(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -2520,6 +2530,13 @@ void QCustomPlot::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 1:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QCPPlotTitle* >(); break;
+            }
+            break;
+        case 21:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QCPAbstractPlottable* >(); break;
             }
             break;
         }
@@ -2669,13 +2686,13 @@ int QCustomPlot::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 23)
+        if (_id < 25)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 23;
+        _id -= 25;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 23)
+        if (_id < 25)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 23;
+        _id -= 25;
     }
 #ifndef QT_NO_PROPERTIES
       else if (_c == QMetaObject::ReadProperty) {

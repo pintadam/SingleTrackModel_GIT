@@ -8,6 +8,10 @@
 #include "mysignal.h"
 #include <QMessageBox>
 
+
+#include "dmc.h"
+#include "qcustomplot.h"
+
 /* for debug */
 #include <QDebug>
 
@@ -29,6 +33,8 @@
 
 #define MeasurementLineNumber 2
 
+extern QCustomPlot *Customplott[MaximumMeasurements];
+
 
 
 namespace Ui {
@@ -49,11 +55,36 @@ public:
     double Lr = 1;
     double M = 1;
     double ESM = 1;
+    double x_position[MaximumMeasurements];
+    double y_position[MaximumMeasurements];
+
+
+    QVector<double> OutputYawRateValues[MaximumMeasurements];
+    QVector<double> Time[MaximumMeasurements];
+    QVector<double> MeasuredYawRateValues[MaximumMeasurements];
+    QVector<double> EstimatedYawRateValues[MaximumMeasurements];
+    QVector<double> AYC_VREF_Values[MaximumMeasurements];
+    QVector<double> FSTANGLE_Values[MaximumMeasurements];
+    QVector<double> FSTANGLEP_Values[MaximumMeasurements];
+    QVector<double> FYAWACC_Values[MaximumMeasurements];
+    QVector<double> AFLATACCC_Values[MaximumMeasurements];
+    QVector<double> COUNTER_ST_Values[MaximumMeasurements];
+    QVector<double> DPSIPIN_Values[MaximumMeasurements];
+    QVector<double> BETAPIN_Values[MaximumMeasurements];
+    QVector<double> RAWSWA_Values[MaximumMeasurements];
+    QVector<double> SLP_ANG_REF_values[MaximumMeasurements];
+    QVector<double> AYCESTIMMY_values[MaximumMeasurements];
+    QVector<double> SASINIT_values[MaximumMeasurements];
+    QVector<double> REFYRSA_values[MaximumMeasurements];
+    QVector<double> RES_AYC_CTRL_value[MaximumMeasurements];
+    QVector<double> RESET_PROHIB_values[MaximumMeasurements];
+    QVector<double> RUNNING_value[MaximumMeasurements];
+
 
     QGridLayout *InitMeasurementsLayout();
     QVBoxLayout *InitEstimationSubLayout();
     mySignal *RawYR, *EstimatedYawRate;
-    mySignal *AYC_VREF, *FSTANGLE, *FSTANGLEP, *FYAWRATE, *FYAWACC, *YAWRREF, *AFLATACCC, *COUNTER_ST, *DPSIPIN, *BETAPIN, *RAWSWA, *SLP_ANG_REF, *AYCESTIMMY;
+    mySignal *AYC_VREF, *FSTANGLE, *FSTANGLEP, *FYAWRATE, *FYAWACC, *YAWRREF, *AFLATACCC, *COUNTER_ST, *DPSIPIN, *BETAPIN, *RAWSWA, *SLP_ANG_REF, *AYCESTIMMY, *SASINIT, *REFYRSA, *RES_AYC_CTRL, *RESET_PROHIB, *RUNNING;
     QVector<double> Calculate_Estimated_Yaw_Rate(int loopcount, int NumberOfMeasurement);
     ~MainWindow();
 
@@ -86,6 +117,14 @@ private:
     QMap<QString, mySignal*>* allSignal;
     QStringList notSelectedSignals;
     QString m_fileNameMDF;
+    DMC *dmc;
+    //QCustomPlot *PositionSelection;
+
+protected:
+    void  closeEvent(QCloseEvent*);
+    void onMouseMoveGraph(QMouseEvent* evt);
+
+
 };
 
 #endif // MAINWINDOW_H

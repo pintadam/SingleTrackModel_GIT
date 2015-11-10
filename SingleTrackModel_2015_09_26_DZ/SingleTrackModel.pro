@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     MDF/MDFLib.cpp \
     MDF/MDFPR.cpp \
     MDF/MDFTX.cpp \
-    ayc_yref.cpp
+    ayc_yref.cpp \
+    dmc.cpp
 
 HEADERS  += mainwindow.h \
     qcustomplot/qcustomplot.h \
@@ -53,6 +54,7 @@ HEADERS  += mainwindow.h \
     hal_base_type_if.he \
     math_lib.he \
     ayc_stm_para.h \
-    ayc_init.h
+    ayc_init.h \
+    dmc.h
 
 FORMS    += mainwindow.ui

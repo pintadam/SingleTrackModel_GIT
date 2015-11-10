@@ -17,7 +17,9 @@ INPUT(
 ./debug/MDFPR.o
 ./debug/MDFTX.o
 ./debug/ayc_yref.o
+./debug/dmc.o
 ./debug/moc_mainwindow.o
 ./debug/moc_qcustomplot.o
 ./debug/moc_mysignal.o
+./debug/moc_dmc.o
 );

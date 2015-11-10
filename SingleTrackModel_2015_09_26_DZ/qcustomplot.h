@@ -52,6 +52,7 @@
 #else
 #  include <QtNumeric>
 #  include <QtPrintSupport>
+#include <QObject>
 #endif
 
 class QCPPainter;
@@ -72,7 +73,9 @@ class QCPLegend;
 class QCPAbstractLegendItem;
 class QCPColorMap;
 class QCPColorScale;
+class MainWindow;
 
+extern int AdjustmentRequested;
 
 /*! \file */
 
@@ -1667,7 +1670,12 @@ class QCP_LIB_DECL QCustomPlot : public QWidget
   Q_PROPERTY(bool noAntialiasingOnDrag READ noAntialiasingOnDrag WRITE setNoAntialiasingOnDrag)
   Q_PROPERTY(Qt::KeyboardModifier multiSelectModifier READ multiSelectModifier WRITE setMultiSelectModifier)
   /// \endcond
+private:
+
 public:
+
+
+
   /*!
     Defines how a layer should be inserted relative to an other layer.
 
@@ -1782,6 +1790,7 @@ public:
   QList<QCPAxis*> selectedAxes() const;
   QList<QCPLegend*> selectedLegends() const;
   Q_SLOT void deselectAll();
+  Q_SLOT void showPointToolTip(QCPAbstractPlottable *plottable, QMouseEvent *event);
   
   bool savePdf(const QString &fileName, bool noCosmeticPen=false, int width=0, int height=0, const QString &pdfCreator="", const QString &pdfTitle="");
   bool savePng(const QString &fileName, int width=0, int height=0, double scale=1.0, int quality=-1);
@@ -1791,6 +1800,7 @@ public:
   QPixmap toPixmap(int width=0, int height=0, double scale=1.0);
   void toPainter(QCPPainter *painter, int width=0, int height=0);
   Q_SLOT void replot(QCustomPlot::RefreshPriority refreshPriority=QCustomPlot::rpHint);
+  Q_SLOT void DoneEditing();
   
   QCPAxis *xAxis, *yAxis, *xAxis2, *yAxis2;
   QCPLegend *legend;
@@ -1882,6 +1892,8 @@ public:
     
     \see setColorInterpolation
   */
+
+  double blabla;
   enum ColorInterpolation { ciRGB  ///< Color channels red, green and blue are linearly interpolated
                             ,ciHSV ///< Color channels hue, saturation and value are linearly interpolated (The hue is interpolated over the shortest angle distance)
                           };
@@ -1929,7 +1941,7 @@ public:
   void loadPreset(GradientPreset preset);
   void clearColorStops();
   QCPColorGradient inverted() const;
-  
+
 protected:
   void updateColorBuffer();
   
@@ -2049,7 +2061,7 @@ protected:
   
 private:
   Q_DISABLE_COPY(QCPAxisRect)
-  
+
   friend class QCustomPlot;
 };
 
@@ -3523,6 +3535,7 @@ protected:
   
   // non-virtual methods:
   QPen mainPen() const;
+
 };
 
 #endif // QCUSTOMPLOT_H

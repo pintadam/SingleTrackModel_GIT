@@ -100,7 +100,7 @@ signed_int16_t                         AYC_YAW_ACC_REF;              /*@ LSB:0.4
 signed_int16_t                         AYC_SLIP_ANGLE_RATE_RA;
 
 signed_int16_t                         AYC_YAW_RATE_REF;
-signed_int16_t                         AYC_REF_YAW_RATE_FROM_SA;               /*!< @ASAP_NAME   REFYRSA @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   reference yaw rate derived from steer angle */
+double                                 AYC_REF_YAW_RATE_FROM_SA;               /*!< @ASAP_NAME   REFYRSA @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   reference yaw rate derived from steer angle */
 signed_int16_t                         AYC_REF_YAW_RATE_FROM_SA_FIL;           /*!< @ASAP_NAME   REFYRSAF @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   filtered reference yaw rate derived from steer angle */
 signed_int16_t                         UNCALIBRATED_YAW_RATE;                  /*!< @ASAP_NAME   RAWYR @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   uncalibrated and not filtered yaw rate */
 signed_int16_t                         UNCALIBRATED_YAW_RATE_FIL;              /*!< @ASAP_NAME   RAWYRFL @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   uncalibrated but filtered yaw rate */
@@ -346,8 +346,12 @@ __SFL_INLINE__ signed_int32_t LSIGN_F (signed_int32_t in_value)
 *
 ******************************************************************************/
 
-double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str, double ayc_model, double ayc_slip_angle, double AYC_ESTIM_MY)
+//AYC_ESTIM_MY helyett az AYCMYMIN-t használni
+//D_ABS-ot megnézni
+double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str, double ayc_model, double ayc_slip_angle, double AYC_ESTIM_MY, double REFYRSA_Measured, double RES_AYC_CTRL_Measured, double RESET_PROHIB_Measured, double RUNNING_Measured, double SASINIT_Measured)
 {
+
+   //QDebug //deb = qDebug();
 
    signed_int16_t  psipp_ref_old;   /* storing old value od psipp for runge kutta */
    signed_int32_t  longerg1;
@@ -372,11 +376,13 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    /* actual alpha at the frontal axle */
    /************************************/
 
+   AYC_YAW_RATE_REF = ayc_model*(1/0.002865);
    AYC_REFERENCE_VELOCITY = ayc_velocity_reference*(1/0.01);
    AYC_DRV_REQ_STEER_ANGLE = ayc_req_str*(1/0.001562);
    AYC_YAW_RATE_MODEL = ayc_model*(1/0.002865);
    AYC_SLIP_ANGLE_REF = ayc_slip_angle*(1/0.001526);
    AYC_ESTIMATED_MY = AYC_ESTIM_MY*(1/0.01);
+   AYC_REF_YAW_RATE_FROM_SA = REFYRSA_Measured*(1/0.00286);
    //qDebug() << "AYC_SLIP_ANGLE_REF: " << AYC_SLIP_ANGLE_REF;
 
    ESM_LAT_FORCE_DELAY_VEL_TAB[0]    = 2000;
@@ -433,12 +439,13 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    vref_test = Int_max*AYC_REFERENCE_VELOCITY;
    if (LABS_F(longerg2) >= vref_test)
    {
-       //qDebug() << "elso";
+       ////deb << "1";
        interg1 = Int_max * (signed_int16_t)LSIGN_F(longerg2);
    }
    else
    {
-       //qDebug() << "masodik";
+       //debuggolás
+       //deb << "2";
        interg1 = (signed_int16_t)(longerg2 / AYC_REFERENCE_VELOCITY);
    }
 
@@ -488,6 +495,8 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    /* Detect on which part of the lateral force function the actual alpha lies */
    if (DABS_F(ialpha_f) >= interg1)
    {
+      //debuggolás
+      //deb << "1";
       //() << "-G2_alphaf_max: " << -G2_alphaf_max;
       /* compute alpha_max from friction coefficient */
       interg2 = Esm_c1_alpha_max + (signed_int16_t)((Esm_c2_alpha_max*(signed_int16_t)AYC_ESTIMATED_MY)/(-G2_alphaf_max));
@@ -498,37 +507,46 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
 
       if (DABS_F(ialpha_f) > interg2)
       {
+         //deb << "1";
          AYC_SINGLE_TRACK_MODEL_STATE = 3;
          if (ialpha_f > (signed_int16_t)0)
          {
+            //deb << "1";
             interg3 = interg2;
          }
          else
          {
+            //deb << "2";
             interg3 = -interg2;
          }
       }
       else
       {
+         //debuggolás
+         //deb << "2";
          AYC_SINGLE_TRACK_MODEL_STATE = 2;
          interg3 = ialpha_f;
       }
 
       if (interg3 > (signed_int16_t)0)
       {
-         //() << "-G1_fflatkorr" << -G1_fflatkorr;
+         //debuggolás
+         //deb << "1";
+          //() << "-G1_fflatkorr" << -G1_fflatkorr;
          interg2 = (signed_int16_t)((((signed_int32_t)interg3-interg1)*Esm_c1_fflatkorr) / (-G1_fflatkorr));
          longerg1 = Fflatlim + interg2;
       }
       else
       {
-         //() << "-G1_fflatkorr" << -G1_fflatkorr;
+         //deb << "2";
+          //() << "-G1_fflatkorr" << -G1_fflatkorr;
          interg2 = (signed_int16_t)((((signed_int32_t)interg3+interg1)*Esm_c1_fflatkorr) / (-G1_fflatkorr));
          longerg1 = -Fflatlim + interg2;
       }
    }
    else
    {
+       //deb << "2";
 
       //() << "-G1_fflat" << -G1_fflat;
       longerg1 = ((signed_int32_t)Esm_c1_fflat*ialpha_f) / (-G1_fflat);   /* result is always signed_int16_t */
@@ -573,10 +591,13 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    longerg2 = ((signed_int32_t)Esm_c1_alphar*AYC_YAW_RATE_MODEL) / (-G2_alphar);
    if (LABS_F(longerg2) >= vref_test )
    {
+      //deb << "1";
       interg1 = Int_max * (signed_int16_t)LSIGN_F(longerg2);
    }
    else
    {
+      //debuggolás
+      //deb << "2";
       interg1 = (signed_int16_t)(longerg2 / AYC_REFERENCE_VELOCITY);
    }
 
@@ -602,11 +623,14 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    //qDebug() << longerg1 << " = " << Esm_c1_betap << " * " << -iF_f << " / (-2) * " << G1_betap ;
    if (LABS_F(longerg1) >= vref_test)
    {
+      //deb << "1";
       interg1 = Int_max * (signed_int16_t)LSIGN_F(longerg1);
      // qDebug() << "interg1: " << Int_max << " * " << LSIGN_F(longerg1);
    }
    else
    {
+      //debuggolás
+      //deb << "2";
       interg1 = (signed_int16_t)(longerg1 / AYC_REFERENCE_VELOCITY);
       //qDebug() << "interg1: " << longerg1 << " / " << AYC_REFERENCE_VELOCITY;
    }
@@ -615,10 +639,13 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    longerg2 = ((signed_int32_t)Esm_c2_betap*(-STM_LAT_FORCE_REAR)) / ((signed_int16_t)(-2)*G2_betap);
    if (LABS_F(longerg2) >= vref_test)
    {
+      //deb << "1";
       interg2 = Int_max * (signed_int16_t)LSIGN_F(longerg2);
    }
    else
    {
+      //debuggolás
+      //deb << "2";
       interg2 = (signed_int16_t)(longerg2 / AYC_REFERENCE_VELOCITY);
    }
    //() << "G3_betap" << G3_betap;
@@ -635,9 +662,15 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    /* Set yaw_acc and beta_vel to zero, if a my-reset has been performed */
    if (Get_stm_model_reset() == true)  /* Task 3861: 001LEM040603 */
    {
+      //deb << "1";
       AYC_YAW_ACC_REF = (signed_int16_t)0;
       AYC_SLIP_ANGLE_RATE_REF = (signed_int16_t)0;
       Set_stm_model_reset(false);   /* Task 3861: 001LEM040603 */
+   }
+   else
+   {
+      //debuggolás
+      //deb << "2";
    }
 
    /* copy last value of yaw acceleration to lokal variable */
@@ -679,11 +712,13 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    longerg1 = ((signed_int32_t)Esm_c3_betaset*ipsip_set)/(-G3_betaset);
    if (LABS_F(longerg1) >= vref_test )
    {
-      //() << "LSIGN_F";
+      //deb << "1";
       interg1 = Int_max * (signed_int16_t)LSIGN_F(longerg1);
    }
    else
    {
+      //debuggolás
+      //deb << "2";
       interg1 = (signed_int16_t)(longerg1 / AYC_REFERENCE_VELOCITY);
    }
 
@@ -700,8 +735,14 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    /* Determination of signs */
    if (AYC_YAW_RATE_MODEL < (signed_int16_t)(0) )
    {
+      //deb << "1";
       ipsip_set *= (signed_int16_t)-1;
       ibeta_set *= (signed_int16_t)-1;
+   }
+   else
+   {
+      //debuggolás
+      //deb << "2";
    }
 
 #if (PDO_CFG & 0x80000)    /* Task 2948: 001LEM170603 */                                                      
@@ -709,18 +750,122 @@ double CALC_AYC_YAW_RATE_REF (double ayc_velocity_reference, double ayc_req_str,
    PDOVAR_STM_IBETA_SET = ibeta_set;
 #endif
 
-   interg1 = AYC_YAW_RATE_REF;
+   interg1 = AYC_YAW_RATE_REF; //EZ az eredeti fájlban volt?
+
+   if (SASINIT_Measured != 1)    //Mérésből olvasni SASINIT                                           /* --> .#A001DUI081099. */
+       {
+           //deb << "1";
+            ESM_DEBOUNCE_TIMER = 0;
+       }
+       else if (ESM_DEBOUNCE_TIMER < Esm_debounce_time)
+       {
+           //debuggolás
+           //deb << "2";
+           /* The reference yawrate may swing after this initialization */
+           AYC_YAW_RATE_MODEL = AYC_REF_YAW_RATE_FROM_SA; //méréből REFYRSA
+           AYC_YAW_RATE_REF = AYC_REF_YAW_RATE_FROM_SA;
+           ESM_DEBOUNCE_TIMER++;                                                  /* --> .#A001DUI081099. */
+       }
+       else if (RES_AYC_CTRL_Measured == 1) //mérésből RES_AYC_CTRL
+       {
+           /* Reset if first control cycle */
+           //deb << "3";
+           if (DABS(ipsip_set) < DABS(AYC_YAW_RATE_MODEL))
+           {
+               //deb << "1";
+               /* Store old model state variables, if Reset */
+               AYC_YAW_RATE_BACK = AYC_YAW_RATE_MODEL;
+               AYC_SLIP_ANGLE_BACK = AYC_SLIP_ANGLE_REF;
+               Set_stm_model_reset_back(true);              /* Task 3861: 001LEM040603 */
+
+               /* perform reset */
+               AYC_YAW_RATE_REF= ipsip_set;
+               interg1 = ipsip_set;
+               AYC_YAW_RATE_MODEL= ipsip_set;
+               if (RESET_PROHIB_Measured != 1) //mérésből RESET_PROHIB
+               {
+                   //deb << "1";
+                   AYC_SLIP_ANGLE_REF= ibeta_set;
+               }
+               else
+               {
+                   //deb << "2";
+               }
+               Set_stm_model_reset(true);   /* Task 3861: 001LEM040603 */
+           }
+           else
+           {
+               //deb << "2";
+               AYC_YAW_RATE_REF = AYC_YAW_RATE_MODEL;
+           }
+       }
+       else if(  (AYC_SINGLE_TRACK_MODEL_STATE >= (signed_int16_t)2)
+               &&(RUNNING_Measured == 1)//mérésből RUNNING
+               &&(DABS_F((signed_int16_t)(((signed_int32_t)AYC_YAW_RATE_MODEL*Esm_max_overswing_of_psip)/Esm_overswing_scale_factor)) > DABS_F(ipsip_set)) )
+       {
+           //deb << "4";
+           AYC_YAW_RATE_REF= ipsip_set;
+           interg1 = ipsip_set;
+           AYC_YAW_RATE_MODEL= ipsip_set;
+           if (RESET_PROHIB_Measured != 1)//mérésből RESET_PROHIB
+           {
+              //deb << "1";
+               AYC_SLIP_ANGLE_REF= ibeta_set;
+           }
+           else
+           {
+               //deb << "2";
+           }
+           Set_stm_model_reset(true);   /* Task 3861: 001LEM040603 */
+       }
+       else
+       {
+           //deb << "5";
+           /* at the limitation of the lateral force function, the set value of the */
+           /* yawrate will be taken only if it's less than the actual model yawrate.*/
+           if (  (AYC_SINGLE_TRACK_MODEL_STATE >= 2)
+               &&(DABS(ipsip_set) < DABS(AYC_YAW_RATE_MODEL))  )
+           {
+               //deb << "1";
+               AYC_YAW_RATE_REF = ipsip_set;
+           }
+           else
+           {
+               //deb << "2";
+               AYC_YAW_RATE_REF = AYC_YAW_RATE_MODEL;
+           }
+
+       } /* END */
+
+
+   //AYC_YAW_RATE_REF = ipsip_set;
    //qDebug() << "interg1:" << interg1;
   //() << "Filter_pt1_hz";
-   AYC_YAW_RATE_REF = (signed_int16_t)Filter_pt1_hz
+   /*AYC_YAW_RATE_REF = (signed_int16_t)Filter_pt1_hz
          (Unfiltered_value(AYC_YAW_RATE_REF),
          Filtered_old_value(interg1),
          Sampling_time_ms(Loop_time_ms),
          Cut_off_freq_hz(Esm_freq_yaw_rate_ref),
+         Scaling_factor(Yaw_rate_scale_fac));*/
+
+   AYC_YAW_RATE_MODEL = (signed_int16_t)Filter_pt1_hz
+         (Unfiltered_value(AYC_YAW_RATE_MODEL),
+         Filtered_old_value(interg1),
+         Sampling_time_ms(Loop_time_ms),
+         Cut_off_freq_hz(Esm_freq_yaw_rate_ref),
          Scaling_factor(Yaw_rate_scale_fac));
+
+   /*AYC_YAW_RATE_REF = (signed_int16_t)Filter_pt1_hz
+         (Unfiltered_value(AYC_YAW_RATE_REF),
+         Filtered_old_value(interg1),
+         Sampling_time_ms(Loop_time_ms),
+         Cut_off_freq_hz(Esm_freq_yaw_rate_ref),
+         Scaling_factor(Yaw_rate_scale_fac));*/
     //qDebug() << "Filtered: " << AYC_YAW_RATE_REF;
 
   //return interg1*LSB;
   //() << "Vége!";
-   return (double)AYC_YAW_RATE_MODEL*(0.002865);
+   //return (double)AYC_REF_YAW_RATE_FROM_SA*0.002865;
+   //deb << AYC_YAW_RATE_REF*0.002865;
+   return (double)AYC_YAW_RATE_MODEL*0.002865;
 }

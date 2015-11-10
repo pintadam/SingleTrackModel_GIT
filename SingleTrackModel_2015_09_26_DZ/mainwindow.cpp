@@ -7,7 +7,6 @@
 #include <QtGui>
 #include <QtCore>
 #include <qtextbrowser.h>
-#include <qcustomplot.h>
 #include <ayc_yref.h>
 
 int MeasurementCount = 0;
@@ -22,12 +21,13 @@ double Difference[MaximumMeasurements];
 double AverageDifference[MaximumMeasurements];
 
 
+QCustomPlot *Customplott[MaximumMeasurements];
 QGroupBox *Data[MaximumMeasurements], *SumData;
 QVBoxLayout *VerticalLayout[MaximumMeasurements], *SumVerticalLayout;
 QLabel *Euler[MaximumMeasurements], *Normal[MaximumMeasurements], *Other[MaximumMeasurements], *EulerSumLabel, *NormalSumLabel, *OtherSumLabel;
-QCustomPlot *Customplott[MaximumMeasurements];
-QVector<double> Time[MaximumMeasurements], MeasuredYawRateValues[MaximumMeasurements],EstimatedYawRateValues[MaximumMeasurements], AYC_VREF_Values[MaximumMeasurements], FSTANGLE_Values[MaximumMeasurements], FSTANGLEP_Values[MaximumMeasurements], FYAWACC_Values[MaximumMeasurements], AFLATACCC_Values[MaximumMeasurements], COUNTER_ST_Values[MaximumMeasurements], DPSIPIN_Values[MaximumMeasurements], BETAPIN_Values[MaximumMeasurements], RAWSWA_Values[MaximumMeasurements], OutputYawRateValues[MaximumMeasurements], SLP_ANG_REF_values[MaximumMeasurements],AYCESTIMMY_values[MaximumMeasurements], temporary(5000);
-QVector<double> calc(1000000);
+//QVector<QVector <double> > OutputYawRateValues[MaximumMeasurements][1000000];
+QVector<double> calc(2000000);
+QVector<double> temporary(2000000);
 
 //mySignal *AYC_VREF, *FSTANGLE, *FSTANGLEP, *FYAWRATE, *FYAWACC, *YAWRREF, *AFLATACCC, *COUNTER_ST, *DPSIPIN, *BETAPIN, *RAWSWA;
 
@@ -35,6 +35,7 @@ QVector<double> calc(1000000);
 
 double EulerValue[MaximumMeasurements], NormalValue[MaximumMeasurements], OtherValue[MaximumMeasurements];
 double EulerSumValue, NormalSumValue, OtherSumValue, SumDelta;
+double calc_last_loop = 0.0;
 
 QString EulerSumString, NormalSumString, OtherSumString, EulerValueString[MaximumMeasurements], NormalValueString[MaximumMeasurements], OtherValueString[MaximumMeasurements];
 
@@ -42,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
     allSignal = new QMap<QString, mySignal*>();
 
@@ -55,6 +57,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->Lr_value->setValidator( new QDoubleValidator(LrMin, LrMax, 2, this) );
     ui->M_value->setValidator( new QDoubleValidator(MMin, MMax, 2, this) );
     ui->ESM_value->setValidator( new QDoubleValidator(ESMMin, ESMMax, 2, this) );
+
+    dmc = new DMC(this);
+    //PositionSelection = new QCustomPlot;
 }
 
 MainWindow::~MainWindow()
@@ -85,6 +90,7 @@ void MainWindow::on_actionSave_Identification_Project_triggered()
 void MainWindow::on_actionLoad_DAS_Measurement_triggered()
 {
 
+    calc_last_loop = 0.0;
 
     for (int i = 0; i < MaximumMeasurements; i++)
     {
@@ -191,13 +197,18 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                         AYC_VREF_Values[Number].clear();
                         FSTANGLE_Values[Number].clear();
                         EstimatedYawRateValues[Number].clear();
-                        FSTANGLEP_Values[Number].clear();
-                        FYAWACC_Values[Number].clear();
-                        AFLATACCC_Values[Number].clear();
-                        COUNTER_ST_Values[Number].clear();
-                        DPSIPIN_Values[Number].clear();
-                        BETAPIN_Values[Number].clear();
-                        RAWSWA_Values[Number].clear();
+                        SASINIT_values[Number].clear();
+                        REFYRSA_values[Number].clear();
+                        RES_AYC_CTRL_value[Number].clear();
+                        RESET_PROHIB_values[Number].clear();
+                        RUNNING_value[Number].clear();
+                        //FSTANGLEP_Values[Number].clear();
+                        //FYAWACC_Values[Number].clear();
+                        //AFLATACCC_Values[Number].clear();
+                        //COUNTER_ST_Values[Number].clear();
+                        //DPSIPIN_Values[Number].clear();
+                        //BETAPIN_Values[Number].clear();
+                        //RAWSWA_Values[Number].clear();
                         SLP_ANG_REF_values[Number].clear();
                         AYCESTIMMY_values[Number].clear();
 
@@ -211,13 +222,18 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                         EstimatedYawRateValues[Number] = YAWRREF->getData();
                         AYC_VREF_Values[Number] = AYC_VREF->getData();
                         FSTANGLE_Values[Number] = FSTANGLE->getData();
-                        FSTANGLEP_Values[Number] = FSTANGLEP->getData();
-                        FYAWACC_Values[Number] = FYAWACC->getData();
-                        AFLATACCC_Values[Number] = AFLATACCC->getData();
-                        COUNTER_ST_Values[Number] = COUNTER_ST->getData();
-                        DPSIPIN_Values[Number] = DPSIPIN->getData();
-                        BETAPIN_Values[Number] = BETAPIN->getData();
-                        RAWSWA_Values[Number] = RAWSWA->getData();
+                        SASINIT_values[Number] = SASINIT->getData();
+                        REFYRSA_values[Number] = REFYRSA->getData();
+                        RES_AYC_CTRL_value[Number] = RES_AYC_CTRL->getData();
+                        RESET_PROHIB_values[Number] = RESET_PROHIB->getData();
+                        RUNNING_value[Number] = RUNNING->getData();
+                        //FSTANGLEP_Values[Number] = FSTANGLEP->getData();
+                        //FYAWACC_Values[Number] = FYAWACC->getData();
+                        //AFLATACCC_Values[Number] = AFLATACCC->getData();
+                        //COUNTER_ST_Values[Number] = COUNTER_ST->getData();
+                        //DPSIPIN_Values[Number] = DPSIPIN->getData();
+                        //BETAPIN_Values[Number] = BETAPIN->getData();
+                        //RAWSWA_Values[Number] = RAWSWA->getData();
                         SLP_ANG_REF_values[Number] = SLP_ANG_REF->getData();
                         AYCESTIMMY_values[Number] = AYCESTIMMY->getData();
 
@@ -243,9 +259,18 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                             qDebug() << "EstimatedYawRateValues:" << EstimatedYawRateValues[0][co];
                             qDebug() << "SLP_ANG_REF_values:" << SLP_ANG_REF_values[0][co];
                             qDebug() << "AYCESTIMMY_values:" << AYCESTIMMY_values[0][co];*/
+                            if (co == 0)
+                            {
+                                calc[co] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[Number][co], FSTANGLE_Values[Number][co], MeasuredYawRateValues[Number][co], SLP_ANG_REF_values[Number][co], AYCESTIMMY_values[Number][co], REFYRSA_values[Number][co], RES_AYC_CTRL_value[Number][co], RESET_PROHIB_values[Number][co], RUNNING_value[Number][co], SASINIT_values[Number][co]);
+                            }
+                            else
+                            {
+                                //qDebug() << "Temp_last_loop: " << calc_last_loop;
+                                calc[co] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[Number][co], FSTANGLE_Values[Number][co], calc_last_loop, SLP_ANG_REF_values[Number][co], AYCESTIMMY_values[Number][co], REFYRSA_values[Number][co], RES_AYC_CTRL_value[Number][co], RESET_PROHIB_values[Number][co], RUNNING_value[Number][co], SASINIT_values[Number][co]);
+                            }
 
-                            calc[co] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[Number][co], FSTANGLE_Values[Number][co], EstimatedYawRateValues[Number][co], SLP_ANG_REF_values[Number][co], AYCESTIMMY_values[Number][co]);
-                            qDebug() << "Temp: " << calc[co];
+                            //qDebug() << "Temp: " << calc[co];
+                            calc_last_loop = calc[co];
                         }
 
                         OutputYawRateValues[Number] = calc;
@@ -278,12 +303,16 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
                         /* rescale axes according to graph's data */
                         mainGraph->rescaleAxes();
                         SecondaryGraph->rescaleAxes(true);
-                        TertiaryGraph->rescaleAxes(true);
+                        //TertiaryGraph->rescaleAxes(true);
+
+                        //Customplott[Number]->mouseDoubleClick();
+
+                        //QCustomPlot::mouse
 
                         Customplott[Number]->replot();
 
                         //Customplott[Number]->setInteraction(QCP::iSelectOther, true);
-
+                        //connect(Customplott[Number], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked(QMouseEvent*, Number)));
                         ui->MeasurementsLayout->addWidget(Customplott[Number],LineCount,ColumnCount);
 
                         Number++;
@@ -316,13 +345,18 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
             AYC_VREF_Values[0].clear();
             FSTANGLE_Values[0].clear();
             EstimatedYawRateValues[0].clear();
-            FSTANGLEP_Values[0].clear();
-            FYAWACC_Values[0].clear();
-            AFLATACCC_Values[0].clear();
-            COUNTER_ST_Values[0].clear();
-            DPSIPIN_Values[0].clear();
-            BETAPIN_Values[0].clear();
-            RAWSWA_Values[0].clear();
+            SASINIT_values[0].clear();
+            REFYRSA_values[0].clear();
+            RES_AYC_CTRL_value[0].clear();
+            RESET_PROHIB_values[0].clear();
+            RUNNING_value[0].clear();
+            //FSTANGLEP_Values[0].clear();
+            //FYAWACC_Values[0].clear();
+            //AFLATACCC_Values[0].clear();
+            //COUNTER_ST_Values[0].clear();
+            //DPSIPIN_Values[0].clear();
+            //BETAPIN_Values[0].clear();
+            //RAWSWA_Values[0].clear();
             SLP_ANG_REF_values[0].clear();
             AYCESTIMMY_values[0].clear();
 
@@ -335,17 +369,22 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
             EstimatedYawRateValues[0] = YAWRREF->getData();
             AYC_VREF_Values[0] = AYC_VREF->getData();
             FSTANGLE_Values[0] = FSTANGLE->getData();
-            FSTANGLEP_Values[0] = FSTANGLEP->getData();
-            FYAWACC_Values[0] = FYAWACC->getData();
-            AFLATACCC_Values[0] = AFLATACCC->getData();
-            COUNTER_ST_Values[0] = COUNTER_ST->getData();
-            DPSIPIN_Values[0] = DPSIPIN->getData();
-            BETAPIN_Values[0] = BETAPIN->getData();
-            RAWSWA_Values[0] = RAWSWA->getData();
+            SASINIT_values[0] = SASINIT->getData();
+            REFYRSA_values[0] = REFYRSA->getData();
+            RES_AYC_CTRL_value[0] = RES_AYC_CTRL->getData();
+            RESET_PROHIB_values[0] = RESET_PROHIB->getData();
+            RUNNING_value[0] = RUNNING->getData();
+            //FSTANGLEP_Values[0] = FSTANGLEP->getData();
+            //FYAWACC_Values[0] = FYAWACC->getData();
+            //AFLATACCC_Values[0] = AFLATACCC->getData();
+            //COUNTER_ST_Values[0] = COUNTER_ST->getData();
+            //DPSIPIN_Values[0] = DPSIPIN->getData();
+            //BETAPIN_Values[0] = BETAPIN->getData();
+            //RAWSWA_Values[0] = RAWSWA->getData();
             SLP_ANG_REF_values[0] = SLP_ANG_REF->getData();
             AYCESTIMMY_values[0] = AYCESTIMMY->getData();
 
-            for (int l = 1; l < (Time[0].count()); l++)
+            for (int l = 0; l < (Time[0].count()); l++)
             {
                 temporary[l] = (MeasuredYawRateValues[0][l]) + 2;
             }
@@ -365,16 +404,39 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
 
             //calc.clear();
 
+            int counting = 0;
+
             for (int co = 0; co < Time[0].count(); co++)
             {
+
                 /*qDebug() << "AYC_VREF_Values:" << AYC_VREF_Values[0][co];
                 qDebug() << "FSTANGLE_Values:" << FSTANGLE_Values[0][co];
                 qDebug() << "EstimatedYawRateValues:" << EstimatedYawRateValues[0][co];
                 qDebug() << "SLP_ANG_REF_values:" << SLP_ANG_REF_values[0][co];
                 qDebug() << "AYCESTIMMY_values:" << AYCESTIMMY_values[0][co];*/
+                //qDebug() << "Temp_last_loop: " << calc_last_loop;
+                if (co == 0)
+                {
+                   calc[co] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[0][co], FSTANGLE_Values[0][co], MeasuredYawRateValues[0][co], SLP_ANG_REF_values[0][co], AYCESTIMMY_values[0][co], MeasuredYawRateValues[0][co], RES_AYC_CTRL_value[0][co], RESET_PROHIB_values[0][co], RUNNING_value[0][co], SASINIT_values[0][co]);
+                }
+                else
+                {
+                    calc[co] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[0][co], FSTANGLE_Values[0][co], calc_last_loop, SLP_ANG_REF_values[0][co], AYCESTIMMY_values[0][co], MeasuredYawRateValues[0][co], RES_AYC_CTRL_value[0][co], RESET_PROHIB_values[0][co], RUNNING_value[0][co], SASINIT_values[0][co]);
+                }
 
-                calc[co] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[0][co], FSTANGLE_Values[0][co], EstimatedYawRateValues[0][co], SLP_ANG_REF_values[0][co], AYCESTIMMY_values[0][co]);
-                qDebug() << "Temp: " << calc[co];
+                if ((co > 1673) && (co < 1712))
+                {
+                    //qDebug() << AYC_VREF_Values[0][co]<< " " << FSTANGLE_Values[0][co]<< " " << calc_last_loop<< " " << SLP_ANG_REF_values[0][co]<< " " << AYCESTIMMY_values[0][co]<< " " << REFYRSA_values[0][co]<< " " << RES_AYC_CTRL_value[0][co]<< " " << calc[co];
+                    //qDebug() << "------------------------------";
+                }
+                if ((counting % 25) == 0)
+                {
+                    //qDebug() << AYC_VREF_Values[0][co]<< " " << FSTANGLE_Values[0][co]<< " " << calc_last_loop<< " " << SLP_ANG_REF_values[0][co]<< " " << AYCESTIMMY_values[0][co]<< " " << REFYRSA_values[0][co]<< " " << RES_AYC_CTRL_value[0][co]<< " " << calc[co];
+                    //qDebug() << "" << co;
+                }
+                //qDebug() << "Temp: " << calc[co];
+                calc_last_loop = calc[co];
+                counting++;
             }
 
             OutputYawRateValues[0] = calc;
@@ -411,6 +473,8 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
             TertiaryGraph->rescaleAxes(true);
 
             ui->MeasurementsLayout->addWidget(Customplott[0],0,0);
+            connect(Customplott[0], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_0(QMouseEvent*)));
+            //connect(Customplott[Number], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked(QMouseEvent*, Number)));
         }
         else
         {
@@ -475,6 +539,62 @@ void MainWindow::on_actionLoad_DAS_Measurement_triggered()
     {
 
     }
+    //connect(Customplott[Number], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked(QMouseEvent*, int num = Number)));
+    for (int con = 0; con < Number; con++)
+    {
+        switch (con)
+        {
+        case 0:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_0(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 1:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_1(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 2:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_2(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 3:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_3(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 4:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_4(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 5:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_5(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 6:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_6(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 7:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_7(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 8:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_8(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 9:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_9(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 10:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_10(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        case 11:
+            connect(Customplott[con], SIGNAL(mouseDoubleClick(QMouseEvent*)),dmc,SLOT(WidgetClicked_11(QMouseEvent*)));
+            qDebug() << "Connect " << con;
+            break;
+        }
+    }
+    //connect(Customplott[0], SIGNAL(mouseDoubleClick(QMouseEvent*)), DMC, SLOT(CustomPlotDoubleClicked(QMouseEvent*)));
 }
 
 void MainWindow::openMDF(QString name)
@@ -547,21 +667,21 @@ void MainWindow::openMDF(QString name)
                         FSTANGLE->loadData();
                     }
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.FSTANGLEP") == 0)
+                   /* if(signal->getName()->compare("XCP_DAQ.Main.FSTANGLEP") == 0)
                     {
 
                         //() << "FSTANGLEP:" << *signal->getName();
                         FSTANGLEP = signal;
                         FSTANGLEP->loadData();
-                    }
+                    }*/
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.FYAWACC") == 0)
+                    /*if(signal->getName()->compare("XCP_DAQ.Main.FYAWACC") == 0)
                     {
 
                         //() << "FYAWACC:" << *signal->getName();
                         FYAWACC = signal;
                         FYAWACC->loadData();
-                    }
+                    }*/
 
                     if(signal->getName()->compare("XCP_DAQ.Main.YAWRREF") == 0)
                     {
@@ -571,45 +691,45 @@ void MainWindow::openMDF(QString name)
                         YAWRREF->loadData();
                     }
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.AFLATACCC") == 0)
+                    /*if(signal->getName()->compare("XCP_DAQ.Main.AFLATACCC") == 0)
                     {
 
                         //() << "AFLATACCC:" << *signal->getName();
                         AFLATACCC = signal;
                         AFLATACCC->loadData();
-                    }
+                    }*/
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.COUNTER_ST") == 0)
+                    /*if(signal->getName()->compare("XCP_DAQ.Main.COUNTER_ST") == 0)
                     {
 
                         //() << "COUNTER_ST:" << *signal->getName();
                         COUNTER_ST = signal;
                         COUNTER_ST->loadData();
-                    }
+                    }*/
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.DPSIPIN") == 0)
+                    /*if(signal->getName()->compare("XCP_DAQ.Main.DPSIPIN") == 0)
                     {
 
                         //() << "DPSIPIN:" << *signal->getName();
                         DPSIPIN = signal;
                         DPSIPIN->loadData();
-                    }
+                    }*/
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.BETAPIN") == 0)
+                    /*if(signal->getName()->compare("XCP_DAQ.Main.BETAPIN") == 0)
                     {
 
                         //() << "BETAPIN:" << *signal->getName();
                         BETAPIN = signal;
                         BETAPIN->loadData();
-                    }
+                    }*/
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.RAWSWA") == 0)
+                    /*if(signal->getName()->compare("XCP_DAQ.Main.RAWSWA") == 0)
                     {
 
                         //() << "RAWSWA:" << *signal->getName();
                         RAWSWA = signal;
                         RAWSWA->loadData();
-                    }
+                    }*/
 
                     if(signal->getName()->compare("XCP_DAQ.Main.SLP_ANG_REF") == 0)
                     {
@@ -619,13 +739,57 @@ void MainWindow::openMDF(QString name)
                         SLP_ANG_REF->loadData();
                     }
 
-                    if(signal->getName()->compare("XCP_DAQ.Main.AYCESTIMMY") == 0)
+                    if(signal->getName()->compare("XCP_DAQ.Main.AYCMYMIN") == 0)
                     {
 
                         //() << "AYCESTIMMY:" << *signal->getName();
                         AYCESTIMMY = signal;
                         AYCESTIMMY->loadData();
                     }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.SASINIT") == 0)
+                    {
+
+                        //() << "AYCESTIMMY:" << *signal->getName();
+                        SASINIT = signal;
+                        SASINIT->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.REFYRSA") == 0)
+                    {
+
+                        qDebug() << "REFYRSA:" << *signal->getName();
+                        REFYRSA = signal;
+                        REFYRSA->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.RES_AYC_CTRL") == 0)
+                    {
+
+                        //() << "AYCESTIMMY:" << *signal->getName();
+                        RES_AYC_CTRL = signal;
+                        RES_AYC_CTRL->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.RESET_PROHIB") == 0)
+                    {
+
+                        //() << "AYCESTIMMY:" << *signal->getName();
+                        RESET_PROHIB = signal;
+                        RESET_PROHIB->loadData();
+                    }
+
+                    if(signal->getName()->compare("XCP_DAQ.Main.RUNNING") == 0)
+                    {
+
+                        //() << "AYCESTIMMY:" << *signal->getName();
+                        RUNNING = signal;
+                        RUNNING->loadData();
+                    }
+
+
+
+
 
                     allSignal->insert(*signal->getName(), signal);
                 }
@@ -798,7 +962,7 @@ QVector<double> MainWindow::Calculate_Estimated_Yaw_Rate(int loopcount, int Numb
             /* Értékadás előtt */
             //() << "Értékadás előtt a " << c << ". ciklusban";
             //qDebug() << "Number of measurement: " << NumberOfMeasurement;
-            EstimatedYawRate_internal[c] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[NumberOfMeasurement][c], FSTANGLE_Values[NumberOfMeasurement][c], EstimatedYawRateValues[NumberOfMeasurement][c], SLP_ANG_REF_values[NumberOfMeasurement][c], AYCESTIMMY_values[NumberOfMeasurement][c]);
+            //EstimatedYawRate_internal[c] = CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[NumberOfMeasurement][c], FSTANGLE_Values[NumberOfMeasurement][c], EstimatedYawRateValues[NumberOfMeasurement][c], SLP_ANG_REF_values[NumberOfMeasurement][c], AYCESTIMMY_values[NumberOfMeasurement][c]);
             //qDebug() << "temp Értékadás után a" << c << ". ciklusban: " << temp;
             //CALC_AYC_YAW_RATE_REF(AYC_VREF_Values[Number][c], FSTANGLE_Values[Number][c]);
             //() << "Értékadás után a " << c << ". ciklusban";
@@ -807,4 +971,9 @@ QVector<double> MainWindow::Calculate_Estimated_Yaw_Rate(int loopcount, int Numb
     //() << "Függvény végén";
     return EstimatedYawRate_internal;
 
+}
+
+void   MainWindow::closeEvent(QCloseEvent*)
+{
+    qApp->quit();
 }

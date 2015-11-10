@@ -24,8 +24,9 @@
 ****************************************************************************/
 
 #include "qcustomplot.h"
+//#include "mainwindow.h"
 
-
+int AdjustmentRequested;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9093,6 +9094,8 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
   mMouseEventElement(0),
   mReplotting(false)
 {
+
+
   setAttribute(Qt::WA_NoMousePropagation);
   setAttribute(Qt::WA_OpaquePaintEvent);
   setMouseTracking(true);
@@ -10399,6 +10402,55 @@ void QCustomPlot::deselectAll()
     foreach (QCPLayerable *layerable, layer->children())
       layerable->deselectEvent(0);
   }
+}
+
+/*
+ *
+ * I maked these
+ *
+ * */
+
+void QCustomPlot::showPointToolTip(QCPAbstractPlottable* plottable,QMouseEvent* event)
+{
+    AdjustmentRequested = 1;
+    //AdjustmentIsRequested[SelectedMeasurement] = 1;
+    double x = this->xAxis->pixelToCoord(event->pos().x());
+    double y = this->yAxis->pixelToCoord(event->pos().y());
+    //qDebug()<<"pixelToCoord: "<<data.key<<data.value; //this is correct when step is greater 1 secondgépppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
+    setToolTip(QString("%1 , %2").arg(x).arg(y));
+    qDebug() << x << " " << y;
+    //mainWindow->x_position[mainWindow->SelectedMeasurementNumber] = x;
+    //mainWindow->y_position[mainWindow->SelectedMeasurementNumber] = y;
+
+    /*switch(mainWindow->SelectedMeasurementNumber)
+    {
+        case 0:
+            break;
+
+        case 1:
+            break;
+
+        case 2:
+            break;
+
+        case 3:
+            break;
+
+        case 4:
+            break;
+
+    }*/
+
+    //for (int cont = 0; cont < MaximumMeasurements; cont++)
+    {
+        //qDebug() << "x[" << cont << "] = " << mainWindow->x_position[cont] << "; y[" << cont << "] = " << mainWindow->y_position[cont];
+    }
+
+}
+
+void QCustomPlot::DoneEditing()
+{
+
 }
 
 /*!
@@ -21367,4 +21419,5 @@ QPen QCPItemBracket::mainPen() const
 {
     return mSelected ? mSelectedPen : mPen;
 }
+
 

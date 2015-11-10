@@ -17,7 +17,9 @@ INPUT(
 ./release/MDFPR.o
 ./release/MDFTX.o
 ./release/ayc_yref.o
+./release/dmc.o
 ./release/moc_mainwindow.o
 ./release/moc_qcustomplot.o
 ./release/moc_mysignal.o
+./release/moc_dmc.o
 );

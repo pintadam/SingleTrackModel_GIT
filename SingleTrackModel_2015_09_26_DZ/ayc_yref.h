@@ -60,7 +60,7 @@
 @return
 @param cut_off_freq_hz
 */
-#define Cut_off_freq_hz(cut_off_freq_hz)            ((float32)(cut_off_freq_hz))
+#define Cut_off_freq_hz(cut_off_freq_hz)            ((float32)(9.7442))
 
 /*
 @details FILTER PT1 MACROS FOR
@@ -184,7 +184,7 @@ extern signed_int16_t             AYC_CONTROL_DEVIATION;
 
  extern signed_int16_t                         AYC_YAW_RATE_REF;
 
- extern signed_int16_t                         AYC_REF_YAW_RATE_FROM_SA;               /*!< @ASAP_NAME   REFYRSA @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   reference yaw rate derived from steer angle */
+ extern double                                  AYC_REF_YAW_RATE_FROM_SA;               /*!< @ASAP_NAME   REFYRSA @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   reference yaw rate derived from steer angle */
  extern signed_int16_t                         AYC_REF_YAW_RATE_FROM_SA_FIL;           /*!< @ASAP_NAME   REFYRSAF @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   filtered reference yaw rate derived from steer angle */
  extern signed_int16_t                         UNCALIBRATED_YAW_RATE;                  /*!< @ASAP_NAME   RAWYR @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   uncalibrated and not filtered yaw rate */
  extern signed_int16_t                         UNCALIBRATED_YAW_RATE_FIL;              /*!< @ASAP_NAME   RAWYRFL @UNIT   deg/s @LSB   0.00286 @MIN   @MAX   @OFFSET   @brief   uncalibrated but filtered yaw rate */
@@ -284,7 +284,7 @@ extern signed_int16_t             AYC_CONTROL_DEVIATION;
  * 'F U N C T I O N - P R O T O T Y P E S'                                    *
  ******************************************************************************/
 
- extern double CALC_AYC_YAW_RATE_REF(double ayc_velocity_reference, double ayc_req_str, double ayc_model, double ayc_slip_angle, double AYC_ESTIM_MY);
+ extern double CALC_AYC_YAW_RATE_REF(double ayc_velocity_reference, double ayc_req_str, double ayc_model, double ayc_slip_angle, double AYC_ESTIM_MY, double REFYRSA_Measured, double RES_AYC_CTRL_Measured, double RESET_PROHIB_Measured, double RUNNING_Measured, double SASINIT_Measured);
  extern void CALC_AYC_YAW_RATE_REF_2 (void);
 
 
@@ -322,23 +322,7 @@ extern signed_int16_t             AYC_CONTROL_DEVIATION;
 
 #define Esm_overswing_scale_factor      (signed_int16_t)256
 #define Yaw_rate_scale_fac 4096                   /* Scaling factor */         /* .!A001RE150799. */
-
-#if 0
-/* Scaling factors from physical units to integer */
-#define Esm_fg_v                        360        m/sec
-#define Esm_fg_delta                    655.34     Grad
-#define Esm_fg_my                       100        1
-#define Esm_fg_psip                     349.04     Grad/sec
-#define Esm_fg_beta                     655.34     Grad
-#define Esm_fg_psipp                    2.443      Grad/sec/sec
-#define Esm_fg_betap                    5.454      Grad/sec
-#define Esm_fg_alphaf                   1311       Grad
-#define Esm_fg_alphar                   1311       Grad
-#define Esm_fg_F_f                      0.008738   N*57.3
-#define Esm_fg_F_f_lat_lim              0.008738   N*57.3
-#define Esm_fg_F_r                      0.006553   N*57.3
-#define Esm_fg_T                        1.969e+6   sec                  /* <-- .!A002RE080699. */
-#endif                                                                         /* --> .!003MS090199. */
+                                                                       /* --> .!003MS090199. */
 
 
 /*------------------------------------------------------------------------*/
@@ -365,82 +349,7 @@ extern signed_int16_t             AYC_CONTROL_DEVIATION;
 #define Esm_c1_tint                     (signed_int16_t)((Gc1_tint*Loop_time_sec)/2.)
 
 
-#if 0
-    /*-------------------------------------------------------------------*/
-    /*                   NUMERICAL SCALING FACTORS                       */
-    /*-------------------------------------------------------------------*/    /* <-- .!003MS090199. */
 
-    #define Gc1_alphaf                  10814.683                         /* --> .!A002RE080699. */
-    #define Gc1_alphar                  10814.683
-    #define Gc1_fflat                   0.10922667
-    #define Gc1_frlat                   0.08192
-    #define Gc1_betap                   14380449
-    #define Gc2_betap                   19173933
-    #define Gc1_psipp                   4581291.6
-    #define Gc2_psipp                   6108388.9
-    #define Gc1_fflatlim                0.022368939
-    #define Gc1_alphaflim               6.144e+008
-    #define Gc1_fflatkorr               0.10922667
-    #define Gc1_psipset                 39.267016
-    #define Gc1_betaset                 6.144e+008
-    #define Gc2_betaset                 1677.6704
-    #define Gc3_betaset                 10814.683
-    #define Gc1_alphaf_max              1310.68
-    #define Gc2_alphaf_max              1677.6704
-
-
-
-    /*-------------------------------------------------------------------*/    /* --> .!003MS090199. */
-    /*             CAR SPECIFIC_CONSTANTS AND DERIVATES                  */
-    /*-------------------------------------------------------------------*/
-
-
-    #define Esm_psip_set_korr           1.1   /*for P23 with value 1.0 RE 08.06.99*/
-
-    /* Common parameters for calculation of factors */
-
-    #define Fc1_alphaf                  (-Vhc_l_f)
-    #define Fc1_alphar                  Vhc_l_r
-    #define Fc1_fflat                   Vhc_c_f
-    #define Fc1_frlat                   Vhc_c_r
-    #define Fc1_betap                   (1/Vhc_vehicle_mass)
-    #define Fc2_betap                   (1/Vhc_vehicle_mass)
-    #define Fc1_psipp                   (Vhc_l_f/Vhc_vehicle_theta)
-    #define Fc2_psipp                   (-Vhc_l_r/Vhc_vehicle_theta)
-    #define Fc1_fflatlim                ((Vhc_vehicle_mass*Mss_to_g*Vhc_l_r)/((Vhc_l_r+Vhc_l_f)*Grad_to_rad))
-    #define Fc1_alphaflim               (1/Vhc_c_f)
-    #define Fc1_fflatkorr               (Esm_c_f_korr*Vhc_c_f)
-    #define Fc1_psip_set                (Mss_to_g*Esm_psip_set_korr/Grad_to_rad)
-    #define Fc1_beta_set                ((1-Esm_c_f_korr)*Vhc_l_f/(Vhc_c_r*Vhc_l_r))
-    #define Fc2_beta_set                (Fc2_alphamax*Esm_c_f_korr*Vhc_c_f*Vhc_l_f)/(Vhc_c_r*Vhc_l_r)
-    #define Fc3_beta_set                Vhc_l_r
-
-    #define Esm_c_f_korr                0.1
-
-
-
-    #define Esm_c1_alphaf               (signed_int16_t)(Gc1_alphaf * Fc1_alphaf)
-    #define Esm_c1_alphar               (signed_int16_t)(Gc1_alphar * Fc1_alphar)
-    #define Esm_c1_fflat                (signed_int16_t)(Gc1_fflat * Fc1_fflat)
-    #define Esm_c1_frlat                (signed_int16_t)(Gc1_frlat * Fc1_frlat)
-    #define Esm_c1_betap                (signed_int16_t)(Gc1_betap * Fc1_betap)
-    #define Esm_c2_betap                (signed_int16_t)(Gc2_betap * Fc2_betap)
-    #define Esm_c1_psipp                (signed_int16_t)(Gc1_psipp * Fc1_psipp)
-    #define Esm_c2_psipp                (signed_int16_t)(Gc2_psipp * Fc2_psipp)
-    #define Esm_c1_fflatlim             (signed_int16_t)(Gc1_fflatlim * Fc1_fflatlim)
-    #define Esm_c1_alphaflim            (signed_int16_t)(Gc1_alphaflim * Fc1_alphaflim)
-    #define Esm_c1_fflatkorr            (signed_int16_t)(Gc1_fflatkorr * Fc1_fflatkorr)
-    #define Esm_c1_psipset              (signed_int16_t)(Gc1_psipset * Fc1_psip_set)
-    #define Esm_c1_alpha_max            (signed_int16_t)(Gc1_alphaf_max * Fc1_alphamax)
-    #define Esm_c2_alpha_max            (signed_int16_t)(Gc2_alphaf_max * Fc2_alphamax)
-    #define Esm_c1_betaset              (signed_int16_t)(Gc1_betaset * Fc1_beta_set)
-    #define Esm_c2_betaset              (signed_int16_t)(Gc2_betaset * Fc2_beta_set)
-    #define Esm_c3_betaset              (signed_int16_t)(Gc3_betaset * Fc3_beta_set)
-
-    /* filter constant for peak filter of lateral force at front axle */       /* --> .!003MS090199. */
-    #define Esm_max_delta_fflat_slow    (signed_int16_t)(0.5*Vhc_c_f*Esm_fg_F_f)
-    #define Esm_max_delta_fflat_quick   (signed_int16_t)(0.1*Vhc_c_f*Esm_fg_F_f) /* <-- .!A002RE080699. */
-#endif
 
  /******************************************************************************
  Extern Name: LABS_F
